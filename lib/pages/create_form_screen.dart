@@ -1,9 +1,8 @@
-//pages/create_form_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../services/api_service.dart';
-import '../widgets/appinio_animated_toggle_tab.dart'; // Import the local widget
+import '../widgets/appinio_animated_toggle_tab.dart';
 
 class CreateFormScreen extends StatefulWidget {
   final VoidCallback? onPostCreated;
@@ -15,17 +14,15 @@ class CreateFormScreen extends StatefulWidget {
 }
 
 class _CreateFormScreenState extends State<CreateFormScreen> {
-  final _fromController = TextEditingController();
   final _routeController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _documentsController = TextEditingController();
   DateTime _departureTime = DateTime.now();
   final ApiService _apiService = ApiService();
   int _selectedTabIndex = 0;
   bool _isLoading = false;
 
-  final Color kDarkBlueColor = const Color(0xFF053149);
+  final Color kRedColor = Colors.red; // Используем красный цвет из дизайна
   final BoxShadow kDefaultBoxshadow = const BoxShadow(
     color: Color(0xFFDFDFDF),
     spreadRadius: 1,
@@ -42,16 +39,16 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
     setState(() => _isLoading = true);
     try {
       if (_selectedTabIndex == 0) {
-        // Create Sender Post ("Отправить посылку")
-        await _apiService.createSenderPost(
+        // Create courier post (now index 0)
+        await _apiService.createCourierPost(
           _routeController.text,
           _departureTime,
           double.tryParse(_priceController.text) ?? 0.0,
           _descriptionController.text,
         );
       } else {
-        // Create Courier Post ("Доставить посылку")
-        await _apiService.createCourierPost(
+        // Create sender post (now index 1)
+        await _apiService.createSenderPost(
           _routeController.text,
           _departureTime,
           double.tryParse(_priceController.text) ?? 0.0,
@@ -77,20 +74,42 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _selectDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.red, // Красный акцент для date picker
+              onPrimary: Colors.white,
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (pickedDate != null && mounted) {
+      setState(() => _departureTime = pickedDate);
+    }
+  }
+
   @override
   void dispose() {
-    _fromController.dispose();
     _routeController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
-    _documentsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Form')),
+      appBar: AppBar(title: const Text('Create Post')),
       body: Stack(
         children: [
           Padding(
@@ -107,17 +126,15 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                       });
                     },
                     tabTexts: const [
-                      'Отправить посылку',
-                      'Доставить посылку',
+                      'Courier Posts', // Теперь первая вкладка
+                      'Sender Posts',  // Теперь вторая вкладка
                     ],
                     height: 40,
-                    width: MediaQuery.of(context).size.width - 32, // Adjust for padding
+                    width: MediaQuery.of(context).size.width - 32,
                     boxDecoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(5),
-                      boxShadow: [
-                        kDefaultBoxshadow,
-                      ],
+                      boxShadow: [kDefaultBoxshadow],
                     ),
                     animatedBoxDecoration: BoxDecoration(
                       boxShadow: [
@@ -128,14 +145,9 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                           offset: const Offset(2, 2),
                         ),
                       ],
-                      color: kDarkBlueColor,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(5),
-                      ),
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1,
-                      ),
+                      color: kRedColor, // Красный цвет для активной вкладки
+                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                      border: Border.all(color: Colors.grey, width: 1),
                     ),
                     activeStyle: const TextStyle(
                       fontSize: 16,
@@ -149,39 +161,49 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  CustomTextField(label: 'Откуда', controller: _fromController),
+                  CustomTextField(label: 'Route', controller: _routeController),
                   const SizedBox(height: 20),
-                  CustomTextField(label: 'Куда', controller: _routeController),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () async {
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2100),
-                      );
-                      if (pickedDate != null && mounted) {
-                        setState(() => _departureTime = pickedDate);
-                      }
-                    },
-                    child: Text('Крайняя дата отправки: ${_departureTime.toString().split(' ')[0]}'),
+                  GestureDetector(
+                    onTap: _selectDate,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Departure Date',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Text(
+                            _departureTime.toString().split(' ')[0],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  CustomTextField(label: 'Описание посылки', controller: _descriptionController),
-                  const SizedBox(height: 20),
-                  CustomTextField(label: 'Документы', controller: _documentsController),
+                  CustomTextField(label: 'Description', controller: _descriptionController),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: _selectedTabIndex == 0 ? 'Цена за посылку' : 'Цена за доставку',
+                    label: _selectedTabIndex == 0 ? 'Delivery Price' : 'Parcel Price',
                     controller: _priceController,
                     keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 20),
-                  CustomButton(text: 'Добавить фото', onPressed: () {}, color: Colors.grey),
-                  const SizedBox(height: 20),
                   CustomButton(
-                    text: 'Сохранить',
+                    text: 'Save',
                     onPressed: _isLoading ? null : _createPost,
                     color: Colors.red,
                   ),
