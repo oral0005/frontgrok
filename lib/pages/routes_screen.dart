@@ -5,7 +5,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/post_card.dart';
 import '../services/api_service.dart';
 import '../models/courier_post.dart';
+import '../models/sender_post.dart';
 import '../widgets/tab_bar_widget.dart';
+
+// Определяем объединенный тип Post
+class Post {
+  final String type;
+  final String route;
+  final DateTime date;
+  final String userLocation;
+  final String userId;
+  final String postId;
+
+  Post({
+    required this.type,
+    required this.route,
+    required this.date,
+    required this.userLocation,
+    required this.userId,
+    required this.postId,
+  });
+}
 
 class RoutesScreen extends StatefulWidget {
   const RoutesScreen({super.key});
@@ -16,7 +36,7 @@ class RoutesScreen extends StatefulWidget {
 
 class _RoutesScreenState extends State<RoutesScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<CourierPost>> _courierPosts;
+  late Future<List<Post>> _posts; // Изменено на List<Post>
   String? _currentUserId;
   int _selectedTabIndex = 0;
 
@@ -30,7 +50,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       _currentUserId = prefs.getString('userId');
-      _courierPosts = _apiService.fetchCourierPosts();
+      _posts = _fetchPosts(); // Загружаем все посты
       if (mounted) setState(() {});
     } catch (e) {
       if (mounted) {
@@ -39,10 +59,47 @@ class _RoutesScreenState extends State<RoutesScreen> {
     }
   }
 
+  Future<List<Post>> _fetchPosts() async {
+    try {
+      final results = await Future.wait([
+        _apiService.fetchSenderPosts(),
+        _apiService.fetchCourierPosts(),
+      ]);
+
+      final List<SenderPost> senderPosts = results[0] as List<SenderPost>;
+      final List<CourierPost> courierPosts = results[1] as List<CourierPost>;
+
+      final List<Post> combinedPosts = [];
+
+      combinedPosts.addAll(senderPosts.map((post) => Post(
+        type: 'sender',
+        route: post.route,
+        date: post.sendTime,
+        userLocation: '${post.user.name}, ${post.user.surname}',
+        userId: post.user.id,
+        postId: post.id,
+      )));
+
+      combinedPosts.addAll(courierPosts.map((post) => Post(
+        type: 'courier',
+        route: post.route,
+        date: post.departureTime,
+        userLocation: '${post.user.name}, ${post.user.surname}',
+        userId: post.user.id,
+        postId: post.id,
+      )));
+
+      combinedPosts.sort((a, b) => b.date.compareTo(a.date));
+      return combinedPosts;
+    } catch (e) {
+      throw Exception('Failed to load posts: $e');
+    }
+  }
+
   Future<void> _refreshPosts() async {
     if (mounted) {
       setState(() {
-        _courierPosts = _apiService.fetchCourierPosts();
+        _posts = _fetchPosts();
       });
     }
     return Future.delayed(const Duration(milliseconds: 100));
@@ -62,8 +119,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshPosts,
-              child: FutureBuilder<List<CourierPost>>(
-                future: _courierPosts,
+              child: FutureBuilder<List<Post>>( // Изменено на List<Post>
+                future: _posts,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -72,12 +129,12 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No courier posts available'));
+                    return const Center(child: Text('No posts available'));
                   }
 
                   final posts = _selectedTabIndex == 0
-                      ? snapshot.data!.where((post) => post.user.id != _currentUserId).toList()
-                      : snapshot.data!.where((post) => post.user.id == _currentUserId).toList();
+                      ? snapshot.data!.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
+                      : snapshot.data!.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
 
                   if (posts.isEmpty) {
                     return Center(
@@ -93,10 +150,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       final post = posts[index];
                       return PostCard(
                         route: post.route,
-                        date: post.departureTime,
-                        userLocation: '${post.user.name}, ${post.user.surname}',
+                        date: post.date,
+                        userLocation: post.userLocation,
                         onMorePressed: () => ScaffoldMessenger.of(context)
                             .showSnackBar(SnackBar(content: Text('More details for ${post.route}'))),
+                        leading: Icon(
+                          post.type == 'sender' ? Icons.send : Icons.local_shipping,
+                          color: post.type == 'sender' ? Colors.blue : Colors.green,
+                        ),
                       );
                     },
                   );
