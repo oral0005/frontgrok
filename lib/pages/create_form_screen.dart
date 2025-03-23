@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontgrok/pages/home_screen.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../services/api_service.dart';
 import '../widgets/appinio_animated_toggle_tab.dart';
+import 'my_posts_screen.dart';
+import 'package:http/http.dart' as http;
 
 class CreateFormScreen extends StatefulWidget {
   final VoidCallback? onPostCreated;
@@ -22,7 +25,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   int _selectedTabIndex = 0;
   bool _isLoading = false;
 
-  final Color kRedColor = Colors.red; // Используем красный цвет из дизайна
+  final Color kRedColor = Colors.red;
   final BoxShadow kDefaultBoxshadow = const BoxShadow(
     color: Color(0xFFDFDFDF),
     spreadRadius: 1,
@@ -38,39 +41,67 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
 
     setState(() => _isLoading = true);
     try {
+      print('Starting post creation process...');
+      final double price = double.tryParse(_priceController.text) ?? 0.0;
+
+      // Добавляем тайм-аут в 10 секунд для API-запросов
       if (_selectedTabIndex == 0) {
-        // Create courier post (now index 0)
+        print('Creating courier post: route=${_routeController.text}, '
+            'departureTime=${_departureTime.toIso8601String()}, '
+            'price=$price, description=${_descriptionController.text}');
         await _apiService.createCourierPost(
           _routeController.text,
           _departureTime,
-          double.tryParse(_priceController.text) ?? 0.0,
+          price,
           _descriptionController.text,
-        );
+        ).timeout(const Duration(seconds: 10), onTimeout: () {
+          throw Exception('Request timed out after 10 seconds');
+        });
+        print('Courier post created successfully');
       } else {
-        // Create sender post (now index 1)
+        print('Creating sender post: route=${_routeController.text}, '
+            'sendTime=${_departureTime.toIso8601String()}, '
+            'price=$price, description=${_descriptionController.text}');
         await _apiService.createSenderPost(
           _routeController.text,
           _departureTime,
-          double.tryParse(_priceController.text) ?? 0.0,
+          price,
           _descriptionController.text,
-        );
+        ).timeout(const Duration(seconds: 10), onTimeout: () {
+          throw Exception('Request timed out after 10 seconds');
+        });
+        print('Sender post created successfully');
       }
+
+      print('Calling onPostCreated callback');
       widget.onPostCreated?.call();
+
       if (mounted) {
-        Navigator.pop(context);
+        print('Navigating to MyPostsScreen');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        print('Widget not mounted, skipping navigation');
       }
     } catch (e) {
+      print('Error during post creation: $e');
       if (mounted) {
-        _showSnackBar(e.toString());
+        _showSnackBar('Failed to create post: $e');
       }
     } finally {
       if (mounted) {
+        print('Setting isLoading to false');
         setState(() => _isLoading = false);
+      } else {
+        print('Widget not mounted, skipping setState');
       }
     }
   }
 
   void _showSnackBar(String message) {
+    print('Showing SnackBar: $message');
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
@@ -84,7 +115,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Colors.red, // Красный акцент для date picker
+              primary: Colors.red,
               onPrimary: Colors.white,
             ),
             dialogBackgroundColor: Colors.white,
@@ -94,12 +125,14 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       },
     );
     if (pickedDate != null && mounted) {
+      print('Selected date: ${pickedDate.toIso8601String()}');
       setState(() => _departureTime = pickedDate);
     }
   }
 
   @override
   void dispose() {
+    print('Disposing controllers');
     _routeController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
@@ -108,6 +141,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building CreateFormScreen');
     return Scaffold(
       appBar: AppBar(title: const Text('Create Post')),
       body: Stack(
@@ -121,14 +155,10 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     duration: const Duration(milliseconds: 150),
                     offset: 0,
                     callback: (int index) {
-                      setState(() {
-                        _selectedTabIndex = index;
-                      });
+                      print('Tab switched to index: $index');
+                      setState(() => _selectedTabIndex = index);
                     },
-                    tabTexts: const [
-                      'Courier Posts', // Теперь первая вкладка
-                      'Sender Posts',  // Теперь вторая вкладка
-                    ],
+                    tabTexts: const ['Courier Posts', 'Sender Posts'],
                     height: 40,
                     width: MediaQuery.of(context).size.width - 32,
                     boxDecoration: BoxDecoration(
@@ -145,7 +175,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                           offset: const Offset(2, 2),
                         ),
                       ],
-                      color: kRedColor, // Красный цвет для активной вкладки
+                      color: kRedColor,
                       borderRadius: const BorderRadius.all(Radius.circular(5)),
                       border: Border.all(color: Colors.grey, width: 1),
                     ),
@@ -176,10 +206,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                         children: [
                           Text(
                             'Departure Date',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
+                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                           ),
                           Text(
                             _departureTime.toString().split(' ')[0],

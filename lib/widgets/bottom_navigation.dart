@@ -20,8 +20,8 @@ class BottomNavigation extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Routes'),
         BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Create'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.list), label: 'My Posts'),
+        BottomNavigationBarItem(icon: Icon(Icons.list), label: 'My Posts'), // Перемещён вверх
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'), // Перемещён вниз
       ],
       type: BottomNavigationBarType.fixed,
     );
