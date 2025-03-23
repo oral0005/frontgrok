@@ -1,31 +1,12 @@
-//pages/routes_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/post_card.dart';
 import '../services/api_service.dart';
 import '../models/courier_post.dart';
 import '../models/sender_post.dart';
-import '../widgets/tab_bar_widget.dart';
-
-// Определяем объединенный тип Post
-class Post {
-  final String type;
-  final String route;
-  final DateTime date;
-  final String userLocation;
-  final String userId;
-  final String postId;
-
-  Post({
-    required this.type,
-    required this.route,
-    required this.date,
-    required this.userLocation,
-    required this.userId,
-    required this.postId,
-  });
-}
+import '../models/post.dart'; // Импортируем общую модель Post
+import '../widgets/tab_bar_widget.dart'; // Убеждаемся, что импорт TabBarWidget правильный
+import '../widgets/post_details_popup.dart';
 
 class RoutesScreen extends StatefulWidget {
   const RoutesScreen({super.key});
@@ -36,7 +17,7 @@ class RoutesScreen extends StatefulWidget {
 
 class _RoutesScreenState extends State<RoutesScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<Post>> _posts; // Изменено на List<Post>
+  late Future<List<Post>> _posts;
   String? _currentUserId;
   int _selectedTabIndex = 0;
 
@@ -50,7 +31,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       _currentUserId = prefs.getString('userId');
-      _posts = _fetchPosts(); // Загружаем все посты
+      _posts = _fetchPosts();
       if (mounted) setState(() {});
     } catch (e) {
       if (mounted) {
@@ -78,6 +59,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
+        price: post.parcelPrice,
+        description: post.description,
       )));
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
@@ -87,6 +70,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
+        price: post.pricePerParcel,
+        description: post.description,
       )));
 
       combinedPosts.sort((a, b) => b.date.compareTo(a.date));
@@ -111,7 +96,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
       appBar: AppBar(title: const Text('Routes')),
       body: Column(
         children: [
-          TabBarWidget(
+          TabBarWidget( // Убеждаемся, что TabBarWidget используется корректно
             firstTab: 'Courier Posts',
             secondTab: 'Sender Posts',
             onTabChanged: (index) => setState(() => _selectedTabIndex = index),
@@ -119,7 +104,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshPosts,
-              child: FutureBuilder<List<Post>>( // Изменено на List<Post>
+              child: FutureBuilder<List<Post>>(
                 future: _posts,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -152,8 +137,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                         route: post.route,
                         date: post.date,
                         userLocation: post.userLocation,
-                        onMorePressed: () => ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text('More details for ${post.route}'))),
+                        onMorePressed: () => PostDetailsPopup.show(context, post),
                         leading: Icon(
                           post.type == 'sender' ? Icons.send : Icons.local_shipping,
                           color: post.type == 'sender' ? Colors.blue : Colors.green,
