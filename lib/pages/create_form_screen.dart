@@ -16,14 +16,56 @@ class CreateFormScreen extends StatefulWidget {
 }
 
 class _CreateFormScreenState extends State<CreateFormScreen> {
-  final _fromController = TextEditingController(); // Заменено _routeController на _fromController
-  final _toController = TextEditingController();   // Добавлено _toController
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime _departureTime = DateTime.now();
   final ApiService _apiService = ApiService();
   int _selectedTabIndex = 0;
   bool _isLoading = false;
+
+  // Список городов Казахстана с населением более 50,000
+  final List<String> _kazakhstanCities = [
+    'Almaty',
+    'Astana (Nur-Sultan)',
+    'Shymkent',
+    'Karaganda (Qaraghandy)',
+    'Aktobe',
+    'Taraz',
+    'Pavlodar',
+    'Ust-Kamenogorsk (Oskemen)',
+    'Semey (Semipalatinsk)',
+    'Atyrau',
+    'Kostanay (Qostanay)',
+    'Kyzylorda',
+    'Uralsk (Oral)',
+    'Petropavl',
+    'Aktau',
+    'Temirtau',
+    'Turkestan',
+    'Taldykorgan',
+    'Ekibastuz',
+    'Rudny',
+    'Zhanaozen',
+    'Zhezkazgan (Jezkazgan)',
+    'Kentau',
+    'Balkhash',
+    'Satbayev (Satpaev)',
+    'Kokshetau',
+    'Saran',
+    'Shakhtinsk',
+    'Ridder',
+    'Arkalyk',
+    'Lisakovsk',
+    'Aral',
+    'Zhetisay',
+    'Saryagash',
+    'Aksu',
+    'Stepnogorsk',
+    'Kapchagay (Kapshagay)',
+  ];
+
+  String? _selectedFrom; // Переменная для хранения выбранного "From"
+  String? _selectedTo;   // Переменная для хранения выбранного "To"
 
   final Color kRedColor = Colors.red;
   final BoxShadow kDefaultBoxshadow = const BoxShadow(
@@ -34,8 +76,8 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   );
 
   Future<void> _createPost() async {
-    if (_fromController.text.isEmpty || _toController.text.isEmpty || _priceController.text.isEmpty) {
-      _showSnackBar('Please fill in required fields');
+    if (_selectedFrom == null || _selectedTo == null || _priceController.text.isEmpty) {
+      _showSnackBar('Please select From, To, and fill in the price');
       return;
     }
 
@@ -45,13 +87,13 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       final double price = double.tryParse(_priceController.text) ?? 0.0;
 
       if (_selectedTabIndex == 0) {
-        print('Creating courier post: from=${_fromController.text}, '
-            'to=${_toController.text}, '
+        print('Creating courier post: from=$_selectedFrom, '
+            'to=$_selectedTo, '
             'departureTime=${_departureTime.toIso8601String()}, '
             'price=$price, description=${_descriptionController.text}');
         await _apiService.createCourierPost(
-          _fromController.text,        // Заменено route на from
-          _toController.text,          // Добавлено to
+          _selectedFrom!,
+          _selectedTo!,
           _departureTime,
           price,
           _descriptionController.text,
@@ -60,13 +102,13 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
         });
         print('Courier post created successfully');
       } else {
-        print('Creating sender post: from=${_fromController.text}, '
-            'to=${_toController.text}, '
+        print('Creating sender post: from=$_selectedFrom, '
+            'to=$_selectedTo, '
             'sendTime=${_departureTime.toIso8601String()}, '
             'price=$price, description=${_descriptionController.text}');
         await _apiService.createSenderPost(
-          _fromController.text,        // Заменено route на from
-          _toController.text,          // Добавлено to
+          _selectedFrom!,
+          _selectedTo!,
           _departureTime,
           price,
           _descriptionController.text,
@@ -136,8 +178,6 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   @override
   void dispose() {
     print('Disposing controllers');
-    _fromController.dispose();        // Обновлено
-    _toController.dispose();          // Добавлено
     _priceController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -195,9 +235,59 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  CustomTextField(label: 'From', controller: _fromController), // Заменено Route на From
+                  // Выпадающий список для "From" с открытием вниз
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'From',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    value: _selectedFrom,
+                    items: _kazakhstanCities.map((city) {
+                      return DropdownMenuItem<String>(
+                        value: city,
+                        child: Text(city),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFrom = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'Please select a city' : null,
+                    menuMaxHeight: 200, // Ограничение высоты списка
+                    isExpanded: true, // Растягивает поле на всю ширину
+                    dropdownColor: Colors.white, // Цвет фона списка
+                    style: const TextStyle(color: Colors.black), // Стиль текста
+                  ),
                   const SizedBox(height: 20),
-                  CustomTextField(label: 'To', controller: _toController),   // Добавлено поле To
+                  // Выпадающий список для "To" с открытием вниз
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'To',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    value: _selectedTo,
+                    items: _kazakhstanCities.map((city) {
+                      return DropdownMenuItem<String>(
+                        value: city,
+                        child: Text(city),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedTo = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'Please select a city' : null,
+                    menuMaxHeight: 200, // Ограничение высоты списка
+                    isExpanded: true, // Растягивает поле на всю ширину
+                    dropdownColor: Colors.white, // Цвет фона списка
+                    style: const TextStyle(color: Colors.black), // Стиль текста
+                  ),
                   const SizedBox(height: 20),
                   GestureDetector(
                     onTap: _selectDate,

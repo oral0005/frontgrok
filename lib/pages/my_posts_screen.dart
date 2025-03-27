@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../models/courier_post.dart';
 import '../models/sender_post.dart';
 import '../models/post.dart';
+import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
 
 class MyPostsScreen extends StatefulWidget {
@@ -18,6 +19,20 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<Post>> _myPosts;
   String? _currentUserId;
+  int _selectedTabIndex = 0;
+  String? _searchFrom; // For search filter
+  String? _searchTo;   // For search filter
+
+  // List of Kazakhstan cities (same as in RoutesScreen and CreateFormScreen)
+  final List<String> _kazakhstanCities = [
+    'Almaty', 'Astana (Nur-Sultan)', 'Shymkent', 'Karaganda (Qaraghandy)', 'Aktobe',
+    'Taraz', 'Pavlodar', 'Ust-Kamenogorsk (Oskemen)', 'Semey (Semipalatinsk)', 'Atyrau',
+    'Kostanay (Qostanay)', 'Kyzylorda', 'Uralsk (Oral)', 'Petropavl', 'Aktau',
+    'Temirtau', 'Turkestan', 'Taldykorgan', 'Ekibastuz', 'Rudny', 'Zhanaozen',
+    'Zhezkazgan (Jezkazgan)', 'Kentau', 'Balkhash', 'Satbayev (Satpaev)', 'Kokshetau',
+    'Saran', 'Shakhtinsk', 'Ridder', 'Arkalyk', 'Lisakovsk', 'Aral', 'Zhetisay',
+    'Saryagash', 'Aksu', 'Stepnogorsk', 'Kapchagay (Kapshagay)',
+  ];
 
   @override
   void initState() {
@@ -56,8 +71,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
       combinedPosts.addAll(senderPosts.map((post) => Post(
         type: 'sender',
-        from: post.from,             // Заменено route на from
-        to: post.to,                 // Заменено route на to
+        from: post.from,
+        to: post.to,
         date: post.sendTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
@@ -68,8 +83,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
         type: 'courier',
-        from: post.from,             // Заменено route на from
-        to: post.to,                 // Заменено route на to
+        from: post.from,
+        to: post.to,
         date: post.departureTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
@@ -94,58 +109,179 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
     return Future.delayed(const Duration(milliseconds: 100));
   }
 
+  void _showSearchDialog() {
+    String? tempFrom = _searchFrom;
+    String? tempTo = _searchTo;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Search My Posts'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'From',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                value: tempFrom,
+                items: _kazakhstanCities.map((city) {
+                  return DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(city),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  tempFrom = value;
+                },
+                menuMaxHeight: 200,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'To',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                value: tempTo,
+                items: _kazakhstanCities.map((city) {
+                  return DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(city),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  tempTo = value;
+                },
+                menuMaxHeight: 200,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _searchFrom = tempFrom;
+                _searchTo = tempTo;
+              });
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Search'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Posts')),
-      body: RefreshIndicator(
-        onRefresh: _refreshPosts,
-        child: FutureBuilder<List<Post>>(
-          future: _myPosts,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Error: ${snapshot.error}', textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _refreshPosts,
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('You have no posts yet'));
-            }
+      appBar: AppBar(
+        title: const Text('My Posts'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: _showSearchDialog,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          TabBarWidget(
+            firstTab: 'Courier Posts',
+            secondTab: 'Sender Posts',
+            onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshPosts,
+              child: FutureBuilder<List<Post>>(
+                future: _myPosts,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Error: ${snapshot.error}', textAlign: TextAlign.center),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _refreshPosts,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('You have no posts yet'));
+                  }
 
-            final posts = snapshot.data!;
+                  var posts = _selectedTabIndex == 0
+                      ? snapshot.data!.where((post) => post.type == 'courier').toList()
+                      : snapshot.data!.where((post) => post.type == 'sender').toList();
 
-            return ListView.builder(
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                final post = posts[index];
-                return PostCard(
-                  from: post.from,             // Заменено route на from
-                  to: post.to,                 // Заменено route на to
-                  date: post.date,
-                  userLocation: post.userLocation,
-                  onMorePressed: () => PostDetailsPopup.show(context, post),
-                  leading: Icon(
-                    post.type == 'sender' ? Icons.send : Icons.local_shipping,
-                    color: post.type == 'sender' ? Colors.blue : Colors.green,
-                  ),
-                );
-              },
-            );
-          },
-        ),
+                  // Apply search filters if set
+                  if (_searchFrom != null) {
+                    posts = posts.where((post) => post.from == _searchFrom).toList();
+                  }
+                  if (_searchTo != null) {
+                    posts = posts.where((post) => post.to == _searchTo).toList();
+                  }
+
+                  if (posts.isEmpty) {
+                    return Center(
+                      child: Text(_selectedTabIndex == 0
+                          ? 'No courier posts available'
+                          : 'No sender posts available'),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: posts.length,
+                    itemBuilder: (context, index) {
+                      final post = posts[index];
+                      return PostCard(
+                        from: post.from,
+                        to: post.to,
+                        date: post.date,
+                        userLocation: post.userLocation,
+                        onMorePressed: () => PostDetailsPopup.show(context, post),
+                        leading: Icon(
+                          post.type == 'sender' ? Icons.send : Icons.local_shipping,
+                          color: post.type == 'sender' ? Colors.blue : Colors.green,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

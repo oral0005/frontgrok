@@ -35,7 +35,7 @@ dependencies:
   provider: ^6.1.2  # For state management
   shared_preferences: ^2.2.3  # For storing token
   intl: ^0.19.0  # For date formatting
-
+  dropdown_search: ^5.0.6
 
 dev_dependencies:
   flutter_test:

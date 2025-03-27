@@ -20,6 +20,19 @@ class _RoutesScreenState extends State<RoutesScreen> {
   late Future<List<Post>> _posts;
   String? _currentUserId;
   int _selectedTabIndex = 0;
+  String? _searchFrom; // For search filter
+  String? _searchTo;   // For search filter
+
+  // List of Kazakhstan cities (same as in CreateFormScreen)
+  final List<String> _kazakhstanCities = [
+    'Almaty', 'Astana (Nur-Sultan)', 'Shymkent', 'Karaganda (Qaraghandy)', 'Aktobe',
+    'Taraz', 'Pavlodar', 'Ust-Kamenogorsk (Oskemen)', 'Semey (Semipalatinsk)', 'Atyrau',
+    'Kostanay (Qostanay)', 'Kyzylorda', 'Uralsk (Oral)', 'Petropavl', 'Aktau',
+    'Temirtau', 'Turkestan', 'Taldykorgan', 'Ekibastuz', 'Rudny', 'Zhanaozen',
+    'Zhezkazgan (Jezkazgan)', 'Kentau', 'Balkhash', 'Satbayev (Satpaev)', 'Kokshetau',
+    'Saran', 'Shakhtinsk', 'Ridder', 'Arkalyk', 'Lisakovsk', 'Aral', 'Zhetisay',
+    'Saryagash', 'Aksu', 'Stepnogorsk', 'Kapchagay (Kapshagay)',
+  ];
 
   @override
   void initState() {
@@ -54,8 +67,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
       combinedPosts.addAll(senderPosts.map((post) => Post(
         type: 'sender',
-        from: post.from,             // Заменено route на from
-        to: post.to,                 // Заменено route на to
+        from: post.from,
+        to: post.to,
         date: post.sendTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
@@ -66,8 +79,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
         type: 'courier',
-        from: post.from,             // Заменено route на from
-        to: post.to,                 // Заменено route на to
+        from: post.from,
+        to: post.to,
         date: post.departureTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
@@ -92,10 +105,102 @@ class _RoutesScreenState extends State<RoutesScreen> {
     return Future.delayed(const Duration(milliseconds: 100));
   }
 
+  void _showSearchDialog() {
+    String? tempFrom = _searchFrom;
+    String? tempTo = _searchTo;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Search Routes'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'From',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                value: tempFrom,
+                items: _kazakhstanCities.map((city) {
+                  return DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(city),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  tempFrom = value;
+                },
+                menuMaxHeight: 200,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'To',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                value: tempTo,
+                items: _kazakhstanCities.map((city) {
+                  return DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(city),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  tempTo = value;
+                },
+                menuMaxHeight: 200,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _searchFrom = tempFrom;
+                _searchTo = tempTo;
+              });
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Search'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Routes')),
+      appBar: AppBar(
+        title: const Text('Routes'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: _showSearchDialog,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           TabBarWidget(
@@ -119,9 +224,17 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     return const Center(child: Text('No posts available'));
                   }
 
-                  final posts = _selectedTabIndex == 0
+                  var posts = _selectedTabIndex == 0
                       ? snapshot.data!.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
                       : snapshot.data!.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
+
+                  // Apply search filters if set
+                  if (_searchFrom != null) {
+                    posts = posts.where((post) => post.from == _searchFrom).toList();
+                  }
+                  if (_searchTo != null) {
+                    posts = posts.where((post) => post.to == _searchTo).toList();
+                  }
 
                   if (posts.isEmpty) {
                     return Center(
@@ -136,8 +249,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     itemBuilder: (context, index) {
                       final post = posts[index];
                       return PostCard(
-                        from: post.from,             // Заменено route на from
-                        to: post.to,                 // Заменено route на to
+                        from: post.from,
+                        to: post.to,
                         date: post.date,
                         userLocation: post.userLocation,
                         onMorePressed: () => PostDetailsPopup.show(context, post),
