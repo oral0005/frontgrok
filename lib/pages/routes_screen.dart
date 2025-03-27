@@ -4,8 +4,8 @@ import '../widgets/post_card.dart';
 import '../services/api_service.dart';
 import '../models/courier_post.dart';
 import '../models/sender_post.dart';
-import '../models/post.dart'; // Импортируем общую модель Post
-import '../widgets/tab_bar_widget.dart'; // Убеждаемся, что импорт TabBarWidget правильный
+import '../models/post.dart';
+import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
 
 class RoutesScreen extends StatefulWidget {
@@ -54,7 +54,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
       combinedPosts.addAll(senderPosts.map((post) => Post(
         type: 'sender',
-        route: post.route,
+        from: post.from,             // Заменено route на from
+        to: post.to,                 // Заменено route на to
         date: post.sendTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
@@ -65,7 +66,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
         type: 'courier',
-        route: post.route,
+        from: post.from,             // Заменено route на from
+        to: post.to,                 // Заменено route на to
         date: post.departureTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
@@ -96,7 +98,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
       appBar: AppBar(title: const Text('Routes')),
       body: Column(
         children: [
-          TabBarWidget( // Убеждаемся, что TabBarWidget используется корректно
+          TabBarWidget(
             firstTab: 'Courier Posts',
             secondTab: 'Sender Posts',
             onTabChanged: (index) => setState(() => _selectedTabIndex = index),
@@ -134,7 +136,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     itemBuilder: (context, index) {
                       final post = posts[index];
                       return PostCard(
-                        route: post.route,
+                        from: post.from,             // Заменено route на from
+                        to: post.to,                 // Заменено route на to
                         date: post.date,
                         userLocation: post.userLocation,
                         onMorePressed: () => PostDetailsPopup.show(context, post),

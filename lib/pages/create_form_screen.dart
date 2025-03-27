@@ -5,7 +5,6 @@ import '../widgets/custom_button.dart';
 import '../services/api_service.dart';
 import '../widgets/appinio_animated_toggle_tab.dart';
 import 'my_posts_screen.dart';
-import 'package:http/http.dart' as http;
 
 class CreateFormScreen extends StatefulWidget {
   final VoidCallback? onPostCreated;
@@ -17,7 +16,8 @@ class CreateFormScreen extends StatefulWidget {
 }
 
 class _CreateFormScreenState extends State<CreateFormScreen> {
-  final _routeController = TextEditingController();
+  final _fromController = TextEditingController(); // Заменено _routeController на _fromController
+  final _toController = TextEditingController();   // Добавлено _toController
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime _departureTime = DateTime.now();
@@ -34,7 +34,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   );
 
   Future<void> _createPost() async {
-    if (_routeController.text.isEmpty || _priceController.text.isEmpty) {
+    if (_fromController.text.isEmpty || _toController.text.isEmpty || _priceController.text.isEmpty) {
       _showSnackBar('Please fill in required fields');
       return;
     }
@@ -44,13 +44,14 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       print('Starting post creation process...');
       final double price = double.tryParse(_priceController.text) ?? 0.0;
 
-      // Добавляем тайм-аут в 10 секунд для API-запросов
       if (_selectedTabIndex == 0) {
-        print('Creating courier post: route=${_routeController.text}, '
+        print('Creating courier post: from=${_fromController.text}, '
+            'to=${_toController.text}, '
             'departureTime=${_departureTime.toIso8601String()}, '
             'price=$price, description=${_descriptionController.text}');
         await _apiService.createCourierPost(
-          _routeController.text,
+          _fromController.text,        // Заменено route на from
+          _toController.text,          // Добавлено to
           _departureTime,
           price,
           _descriptionController.text,
@@ -59,11 +60,13 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
         });
         print('Courier post created successfully');
       } else {
-        print('Creating sender post: route=${_routeController.text}, '
+        print('Creating sender post: from=${_fromController.text}, '
+            'to=${_toController.text}, '
             'sendTime=${_departureTime.toIso8601String()}, '
             'price=$price, description=${_descriptionController.text}');
         await _apiService.createSenderPost(
-          _routeController.text,
+          _fromController.text,        // Заменено route на from
+          _toController.text,          // Добавлено to
           _departureTime,
           price,
           _descriptionController.text,
@@ -133,7 +136,8 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   @override
   void dispose() {
     print('Disposing controllers');
-    _routeController.dispose();
+    _fromController.dispose();        // Обновлено
+    _toController.dispose();          // Добавлено
     _priceController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -191,7 +195,9 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  CustomTextField(label: 'Route', controller: _routeController),
+                  CustomTextField(label: 'From', controller: _fromController), // Заменено Route на From
+                  const SizedBox(height: 20),
+                  CustomTextField(label: 'To', controller: _toController),   // Добавлено поле To
                   const SizedBox(height: 20),
                   GestureDetector(
                     onTap: _selectDate,

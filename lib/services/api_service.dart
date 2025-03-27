@@ -96,7 +96,6 @@ class ApiService {
     }
   }
 
-  // Fetch all courier posts
   Future<List<CourierPost>> fetchCourierPosts() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/courier-posts'));
@@ -130,7 +129,6 @@ class ApiService {
     }
   }
 
-  // Fetch all sender posts
   Future<List<SenderPost>> fetchSenderPosts() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/sender-posts'));
@@ -164,7 +162,6 @@ class ApiService {
     }
   }
 
-  // Fetch the user's own courier posts
   Future<List<CourierPost>> fetchMyCourierPosts() async {
     final token = await _getToken();
     if (token == null) {
@@ -212,7 +209,6 @@ class ApiService {
     }
   }
 
-  // Fetch the user's own sender posts (new method)
   Future<List<SenderPost>> fetchMySenderPosts() async {
     final token = await _getToken();
     if (token == null) {
@@ -260,8 +256,7 @@ class ApiService {
     }
   }
 
-  // Create a courier post
-  Future<void> createCourierPost(String route, DateTime departureTime, double pricePerParcel, String description) async {
+  Future<void> createCourierPost(String from, String to, DateTime departureTime, double pricePerParcel, String description) async {
     final token = await _getToken();
     if (token == null) throw Exception('No token found');
 
@@ -273,7 +268,8 @@ class ApiService {
           'x-auth-token': token,
         },
         body: jsonEncode({
-          'route': route,
+          'from': from,              // Заменено route на from
+          'to': to,                  // Заменено route на to
           'departureTime': departureTime.toIso8601String(),
           'pricePerParcel': pricePerParcel,
           'description': description,
@@ -292,8 +288,7 @@ class ApiService {
     }
   }
 
-  // Create a sender post
-  Future<void> createSenderPost(String route, DateTime sendTime, double parcelPrice, String description) async {
+  Future<void> createSenderPost(String from, String to, DateTime sendTime, double parcelPrice, String description) async {
     final token = await _getToken();
     if (token == null) throw Exception('No token found');
 
@@ -305,7 +300,8 @@ class ApiService {
           'x-auth-token': token,
         },
         body: jsonEncode({
-          'route': route,
+          'from': from,              // Заменено route на from
+          'to': to,                  // Заменено route на to
           'sendTime': sendTime.toIso8601String(),
           'parcelPrice': parcelPrice,
           'description': description,

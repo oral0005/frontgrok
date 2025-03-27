@@ -1,10 +1,10 @@
 //models/courier_post.dart
 
 import 'package:frontgrok/models/user.dart';
-
 class CourierPost {
   final String id;
-  final String route;
+  final String from; // Новое поле
+  final String to;   // Новое поле
   final DateTime departureTime;
   final double pricePerParcel;
   final String description;
@@ -13,7 +13,8 @@ class CourierPost {
 
   CourierPost({
     required this.id,
-    required this.route,
+    required this.from,
+    required this.to,
     required this.departureTime,
     required this.pricePerParcel,
     required this.description,
@@ -24,7 +25,8 @@ class CourierPost {
   factory CourierPost.fromJson(Map<String, dynamic> json) {
     return CourierPost(
       id: json['_id']?.toString() ?? '',
-      route: json['route']?.toString() ?? '',
+      from: json['from']?.toString() ?? '', // Замена route на from
+      to: json['to']?.toString() ?? '',     // Замена route на to
       departureTime: DateTime.tryParse(json['departureTime']?.toString() ?? '') ?? DateTime.now(),
       pricePerParcel: (json['pricePerParcel'] as num?)?.toDouble() ?? 0.0,
       description: json['description']?.toString() ?? '',

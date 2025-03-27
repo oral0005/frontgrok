@@ -1,6 +1,7 @@
 class Post {
   final String type;
-  final String route;
+  final String from; // Новое поле
+  final String to;   // Новое поле
   final DateTime date;
   final String userLocation;
   final String userId;
@@ -10,7 +11,8 @@ class Post {
 
   Post({
     required this.type,
-    required this.route,
+    required this.from,
+    required this.to,
     required this.date,
     required this.userLocation,
     required this.userId,

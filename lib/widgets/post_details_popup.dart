@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/post.dart'; // Импортируем общую модель Post
+import '../models/post.dart';
 
 class PostDetailsPopup {
   static void show(BuildContext context, Post post) {
@@ -18,7 +18,7 @@ class PostDetailsPopup {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  post.route,
+                  '${post.from} → ${post.to}', // Обновлено с from и to
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -30,7 +30,8 @@ class PostDetailsPopup {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildDetailField('Type', post.type == 'sender' ? 'Sender' : 'Courier'),
-                _buildDetailField('Route', post.route),
+                _buildDetailField('From', post.from),           // Заменено Route на From
+                _buildDetailField('To', post.to),               // Добавлено To
                 _buildDetailField('Date', post.date.toString().split('.')[0]),
                 _buildDetailField('User', post.userLocation),
                 _buildDetailField('Price', '${post.price.toStringAsFixed(2)} KZT'),

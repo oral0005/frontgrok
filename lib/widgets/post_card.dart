@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 class PostCard extends StatelessWidget {
-  final String route;
+  final String from; // Заменено route на from
+  final String to;   // Заменено route на to
   final DateTime date;
   final String userLocation;
   final VoidCallback onMorePressed;
-  final Widget? leading; // Add leading widget for icon
+  final Widget? leading;
 
   const PostCard({
     super.key,
-    required this.route,
+    required this.from,
+    required this.to,
     required this.date,
     required this.userLocation,
     required this.onMorePressed,
@@ -21,8 +23,8 @@ class PostCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
-        leading: leading, // Display the icon (sender or courier)
-        title: Text(route),
+        leading: leading,
+        title: Text('$from → $to'), // Обновлено отображение с from и to
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
