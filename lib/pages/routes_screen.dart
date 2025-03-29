@@ -20,10 +20,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
   late Future<List<Post>> _posts;
   String? _currentUserId;
   int _selectedTabIndex = 0;
-  String? _searchFrom; // For search filter
-  String? _searchTo;   // For search filter
+  String? _searchFrom;
+  String? _searchTo;
+  DateTime? _searchDate;
+  double? _minPrice;
+  double? _maxPrice;
+  String _sortBy = 'date'; // Default sort by date
+  bool _sortAscending = false; // Default descending
 
-  // List of Kazakhstan cities (same as in CreateFormScreen)
   final List<String> _kazakhstanCities = [
     'Almaty', 'Astana (Nur-Sultan)', 'Shymkent', 'Karaganda (Qaraghandy)', 'Aktobe',
     'Taraz', 'Pavlodar', 'Ust-Kamenogorsk (Oskemen)', 'Semey (Semipalatinsk)', 'Atyrau',
@@ -89,7 +93,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
         description: post.description,
       )));
 
-      combinedPosts.sort((a, b) => b.date.compareTo(a.date));
       return combinedPosts;
     } catch (e) {
       throw Exception('Failed to load posts: $e');
@@ -108,6 +111,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
   void _showSearchDialog() {
     String? tempFrom = _searchFrom;
     String? tempTo = _searchTo;
+    DateTime? tempDate = _searchDate;
+    double? tempMinPrice = _minPrice;
+    double? tempMaxPrice = _maxPrice;
 
     showDialog(
       context: context,
@@ -120,20 +126,11 @@ class _RoutesScreenState extends State<RoutesScreen> {
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: 'From',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 value: tempFrom,
-                items: _kazakhstanCities.map((city) {
-                  return DropdownMenuItem<String>(
-                    value: city,
-                    child: Text(city),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  tempFrom = value;
-                },
+                items: _kazakhstanCities.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+                onChanged: (value) => tempFrom = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
                 dropdownColor: Colors.white,
@@ -143,50 +140,79 @@ class _RoutesScreenState extends State<RoutesScreen> {
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: 'To',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 value: tempTo,
-                items: _kazakhstanCities.map((city) {
-                  return DropdownMenuItem<String>(
-                    value: city,
-                    child: Text(city),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  tempTo = value;
-                },
+                items: _kazakhstanCities.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+                onChanged: (value) => tempTo = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
                 dropdownColor: Colors.white,
                 style: const TextStyle(color: Colors.black),
               ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () async {
+                  final selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: tempDate ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                  );
+                  if (selectedDate != null) tempDate = selectedDate;
+                },
+                child: Text(tempDate == null ? 'Select Date' : 'Date: ${tempDate.toString().substring(0, 10)}'),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Min Price',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) => tempMinPrice = value.isNotEmpty ? double.tryParse(value) : null,
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Max Price',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) => tempMaxPrice = value.isNotEmpty ? double.tryParse(value) : null,
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               setState(() {
                 _searchFrom = tempFrom;
                 _searchTo = tempTo;
+                _searchDate = tempDate;
+                _minPrice = tempMinPrice;
+                _maxPrice = tempMaxPrice;
               });
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Search'),
           ),
         ],
       ),
     );
+  }
+
+  void _sortPosts(List<Post> posts) {
+    if (_sortBy == 'date') {
+      posts.sort((a, b) => _sortAscending ? a.date.compareTo(b.date) : b.date.compareTo(a.date));
+    } else if (_sortBy == 'price') {
+      posts.sort((a, b) => _sortAscending
+          ? (a.price ?? 0).compareTo(b.price ?? 0)
+          : (b.price ?? 0).compareTo(a.price ?? 0));
+    }
   }
 
   @override
@@ -195,9 +221,25 @@ class _RoutesScreenState extends State<RoutesScreen> {
       appBar: AppBar(
         title: const Text('Routes'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: _showSearchDialog,
+          IconButton(icon: const Icon(Icons.search), onPressed: _showSearchDialog),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              setState(() {
+                if (value == 'date_asc' || value == 'date_desc') {
+                  _sortBy = 'date';
+                  _sortAscending = value == 'date_asc';
+                } else if (value == 'price_asc' || value == 'price_desc') {
+                  _sortBy = 'price';
+                  _sortAscending = value == 'price_asc';
+                }
+              });
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'date_desc', child: Text('Sort by Date (Newest First)')),
+              const PopupMenuItem(value: 'date_asc', child: Text('Sort by Date (Oldest First)')),
+              const PopupMenuItem(value: 'price_asc', child: Text('Sort by Price (Low to High)')),
+              const PopupMenuItem(value: 'price_desc', child: Text('Sort by Price (High to Low)')),
+            ],
           ),
         ],
       ),
@@ -228,13 +270,20 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       ? snapshot.data!.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
                       : snapshot.data!.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
 
-                  // Apply search filters if set
-                  if (_searchFrom != null) {
-                    posts = posts.where((post) => post.from == _searchFrom).toList();
+                  // Apply search filters
+                  if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
+                  if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
+                  if (_searchDate != null) {
+                    posts = posts.where((post) =>
+                    post.date.year == _searchDate!.year &&
+                        post.date.month == _searchDate!.month &&
+                        post.date.day == _searchDate!.day).toList();
                   }
-                  if (_searchTo != null) {
-                    posts = posts.where((post) => post.to == _searchTo).toList();
-                  }
+                  if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
+                  if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
+
+                  // Apply sorting
+                  _sortPosts(posts);
 
                   if (posts.isEmpty) {
                     return Center(
