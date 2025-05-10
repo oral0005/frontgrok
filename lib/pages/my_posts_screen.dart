@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/post_card.dart';
@@ -142,6 +143,25 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
     return Future.delayed(const Duration(milliseconds: 100));
   }
 
+  Future<void> _deletePost(Post post) async {
+    try {
+      if (post.type == 'sender') {
+        await _apiService.deleteSenderPost(post.postId);
+      } else {
+        await _apiService.deleteCourierPost(post.postId);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Post deleted successfully')),
+      );
+      // Refresh the posts list after deletion
+      _refreshPosts();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting post: $e')),
+      );
+    }
+  }
+
   void _showSearchDialog() {
     String? tempFrom = _searchFrom;
     String? tempTo = _searchTo;
@@ -163,7 +183,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 value: tempFrom,
-                items: _kazakhstanCities.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+                items: _kazakhstanCities
+                    .map((city) => DropdownMenuItem(value: city, child: Text(city)))
+                    .toList(),
                 onChanged: (value) => tempFrom = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
@@ -177,7 +199,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 value: tempTo,
-                items: _kazakhstanCities.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+                items: _kazakhstanCities
+                    .map((city) => DropdownMenuItem(value: city, child: Text(city)))
+                    .toList(),
                 onChanged: (value) => tempTo = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
@@ -190,12 +214,14 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   final selectedDate = await showDatePicker(
                     context: context,
                     initialDate: tempDate ?? DateTime.now(),
-                    firstDate: DateTime(2020),
+                    firstDate: DateTime.now(), // Restrict to future dates
                     lastDate: DateTime(2030),
                   );
                   if (selectedDate != null) tempDate = selectedDate;
                 },
-                child: Text(tempDate == null ? 'Select Date' : 'Date: ${tempDate.toString().substring(0, 10)}'),
+                child: Text(tempDate == null
+                    ? 'Select Date'
+                    : 'Date: ${tempDate.toString().substring(0, 10)}'),
               ),
               const SizedBox(height: 20),
               TextField(
@@ -204,7 +230,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 keyboardType: TextInputType.number,
-                onChanged: (value) => tempMinPrice = value.isNotEmpty ? double.tryParse(value) : null,
+                onChanged: (value) =>
+                tempMinPrice = value.isNotEmpty ? double.tryParse(value) : null,
               ),
               const SizedBox(height: 20),
               TextField(
@@ -213,7 +240,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 keyboardType: TextInputType.number,
-                onChanged: (value) => tempMaxPrice = value.isNotEmpty ? double.tryParse(value) : null,
+                onChanged: (value) =>
+                tempMaxPrice = value.isNotEmpty ? double.tryParse(value) : null,
               ),
             ],
           ),
@@ -231,7 +259,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               });
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Search'),
           ),
         ],
@@ -312,9 +341,14 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     return const Center(child: Text('You have no posts yet'));
                   }
 
+                  final now = DateTime.now();
                   var posts = _selectedTabIndex == 0
-                      ? snapshot.data!.where((post) => post.type == 'courier').toList()
-                      : snapshot.data!.where((post) => post.type == 'sender').toList();
+                      ? snapshot.data!
+                      .where((post) => post.type == 'courier' && post.date.isAfter(now))
+                      .toList()
+                      : snapshot.data!
+                      .where((post) => post.type == 'sender' && post.date.isAfter(now))
+                      .toList();
 
                   // Apply search filters
                   if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
@@ -349,6 +383,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                         date: post.date,
                         userLocation: post.userLocation,
                         onMorePressed: () => PostDetailsPopup.show(context, post),
+                        onDeletePressed: () => _showDeleteConfirmationDialog(post),
                         leading: Icon(
                           post.type == 'sender' ? Icons.send : Icons.local_shipping,
                           color: post.type == 'sender' ? Colors.blue : Colors.green,
@@ -359,6 +394,31 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                 },
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(Post post) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Post'),
+        content: Text('Are you sure you want to delete the post from ${post.from} to ${post.to}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              _deletePost(post); // Perform deletion
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Delete'),
           ),
         ],
       ),

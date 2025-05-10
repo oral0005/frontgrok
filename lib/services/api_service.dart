@@ -342,4 +342,53 @@ class ApiService {
       return null; // Возвращаем null в случае ошибки, чтобы не прерывать UX
     }
   }
+  Future<void> deleteSenderPost(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/sender-posts/$postId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+
+      print('Delete sender post response status: ${response.statusCode}');
+      print('Delete sender post response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        throw Exception(errorBody['msg']?.toString() ?? 'Failed to delete sender post: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Delete sender post error: $e');
+    }
+  }
+
+  Future<void> deleteCourierPost(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/courier-posts/$postId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+
+      print('Delete courier post response status: ${response.statusCode}');
+      print('Delete courier post response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        throw Exception(errorBody['msg']?.toString() ?? 'Failed to delete courier post: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Delete courier post error: $e');
+    }
+  }
 }

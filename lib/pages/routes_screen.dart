@@ -186,7 +186,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                   final selectedDate = await showDatePicker(
                     context: context,
                     initialDate: tempDate ?? DateTime.now(),
-                    firstDate: DateTime(2020),
+                    firstDate: DateTime.now(), // Ограничиваем выбор дат прошлым
                     lastDate: DateTime(2030),
                   );
                   if (selectedDate != null) tempDate = selectedDate;
@@ -296,11 +296,16 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     return const Center(child: Text('No posts available'));
                   }
 
+                  // Фильтрация постов
                   var posts = _selectedTabIndex == 0
                       ? snapshot.data!.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
                       : snapshot.data!.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
 
-                  // Apply search filters
+                  // Фильтр для исключения прошедших постов
+                  final now = DateTime.now();
+                  posts = posts.where((post) => post.date.isAfter(now)).toList();
+
+                  // Применение поисковых фильтров
                   if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
                   if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
                   if (_searchDate != null) {
@@ -312,7 +317,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                   if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
                   if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
 
-                  // Apply sorting
+                  // Применение сортировки
                   _sortPosts(posts);
 
                   if (posts.isEmpty) {

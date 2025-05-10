@@ -1,11 +1,13 @@
+
 import 'package:flutter/material.dart';
 
 class PostCard extends StatelessWidget {
-  final String from; // Заменено route на from
-  final String to;   // Заменено route на to
+  final String from;
+  final String to;
   final DateTime date;
   final String userLocation;
   final VoidCallback onMorePressed;
+  final VoidCallback? onDeletePressed;
   final Widget? leading;
 
   const PostCard({
@@ -15,6 +17,7 @@ class PostCard extends StatelessWidget {
     required this.date,
     required this.userLocation,
     required this.onMorePressed,
+    this.onDeletePressed,
     this.leading,
   });
 
@@ -24,7 +27,7 @@ class PostCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: leading,
-        title: Text('$from → $to'), // Обновлено отображение с from и to
+        title: Text('$from → $to'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -32,9 +35,19 @@ class PostCard extends StatelessWidget {
             Text('User: $userLocation'),
           ],
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.more_vert),
-          onPressed: onMorePressed,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: onMorePressed,
+            ),
+            if (onDeletePressed != null) // Show delete button only if callback is provided
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: onDeletePressed,
+              ),
+          ],
         ),
       ),
     );
