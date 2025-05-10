@@ -268,8 +268,8 @@ class ApiService {
           'x-auth-token': token,
         },
         body: jsonEncode({
-          'from': from,              // Заменено route на from
-          'to': to,                  // Заменено route на to
+          'from': from,
+          'to': to,
           'departureTime': departureTime.toIso8601String(),
           'pricePerParcel': pricePerParcel,
           'description': description,
@@ -300,8 +300,8 @@ class ApiService {
           'x-auth-token': token,
         },
         body: jsonEncode({
-          'from': from,              // Заменено route на from
-          'to': to,                  // Заменено route на to
+          'from': from,
+          'to': to,
           'sendTime': sendTime.toIso8601String(),
           'parcelPrice': parcelPrice,
           'description': description,
@@ -317,6 +317,29 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Create sender post error: $e');
+    }
+  }
+
+  Future<double?> fetchRecommendedPrice(String from, String to) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/price-predictions/recommended-price?from=$from&to=$to'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('Fetch recommended price response status: ${response.statusCode}');
+      print('Fetch recommended price response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['recommendedPrice']?.toDouble();
+      } else {
+        final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        throw Exception(errorBody['msg']?.toString() ?? 'Failed to fetch recommended price: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Fetch recommended price error: $e');
+      return null; // Возвращаем null в случае ошибки, чтобы не прерывать UX
     }
   }
 }

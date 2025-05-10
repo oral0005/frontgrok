@@ -22,22 +22,24 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   final ApiService _apiService = ApiService();
   int _selectedTabIndex = 0;
   bool _isLoading = false;
+  double? _recommendedPrice;
+  bool _isFetchingPrice = false;
 
   // Список городов Казахстана с населением более 50,000
   final List<String> _kazakhstanCities = [
     'Almaty',
-    'Astana (Nur-Sultan)',
+    'Astana',
     'Shymkent',
-    'Karaganda (Qaraghandy)',
+    'Karaganda',
     'Aktobe',
     'Taraz',
     'Pavlodar',
-    'Ust-Kamenogorsk (Oskemen)',
-    'Semey (Semipalatinsk)',
+    'Ust-Kamenogorsk',
+    'Semey',
     'Atyrau',
-    'Kostanay (Qostanay)',
+    'Kostanay',
     'Kyzylorda',
-    'Uralsk (Oral)',
+    'Uralsk',
     'Petropavl',
     'Aktau',
     'Temirtau',
@@ -46,10 +48,10 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
     'Ekibastuz',
     'Rudny',
     'Zhanaozen',
-    'Zhezkazgan (Jezkazgan)',
+    'Zhezkazgan',
     'Kentau',
     'Balkhash',
-    'Satbayev (Satpaev)',
+    'Satbayev',
     'Kokshetau',
     'Saran',
     'Shakhtinsk',
@@ -61,11 +63,11 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
     'Saryagash',
     'Aksu',
     'Stepnogorsk',
-    'Kapchagay (Kapshagay)',
+    'Kapchagay',
   ];
 
-  String? _selectedFrom; // Переменная для хранения выбранного "From"
-  String? _selectedTo;   // Переменная для хранения выбранного "To"
+  String? _selectedFrom;
+  String? _selectedTo;
 
   final Color kRedColor = Colors.red;
   final BoxShadow kDefaultBoxshadow = const BoxShadow(
@@ -74,6 +76,36 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
     blurRadius: 10,
     offset: Offset(2, 2),
   );
+
+  Future<void> _fetchRecommendedPrice() async {
+    if (_selectedFrom == null || _selectedTo == null) {
+      setState(() {
+        _recommendedPrice = null;
+        _isFetchingPrice = false;
+      });
+      return;
+    }
+
+    setState(() => _isFetchingPrice = true);
+    try {
+      final price = await _apiService.fetchRecommendedPrice(_selectedFrom!, _selectedTo!);
+      if (mounted) {
+        setState(() {
+          _recommendedPrice = price;
+          _isFetchingPrice = false;
+        });
+        print('Recommended price fetched: $_recommendedPrice');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _recommendedPrice = null;
+          _isFetchingPrice = false;
+        });
+        print('Error fetching recommended price: $e');
+      }
+    }
+  }
 
   Future<void> _createPost() async {
     if (_selectedFrom == null || _selectedTo == null || _priceController.text.isEmpty) {
@@ -200,7 +232,11 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     offset: 0,
                     callback: (int index) {
                       print('Tab switched to index: $index');
-                      setState(() => _selectedTabIndex = index);
+                      setState(() {
+                        _selectedTabIndex = index;
+                        // Больше не нужно вызывать _fetchRecommendedPrice при смене вкладки,
+                        // так как postType не влияет на запрос
+                      });
                     },
                     tabTexts: const ['Courier Posts', 'Sender Posts'],
                     height: 40,
@@ -235,7 +271,6 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Выпадающий список для "From" с открытием вниз
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'From',
@@ -253,16 +288,16 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     onChanged: (value) {
                       setState(() {
                         _selectedFrom = value;
+                        _fetchRecommendedPrice();
                       });
                     },
                     validator: (value) => value == null ? 'Please select a city' : null,
-                    menuMaxHeight: 200, // Ограничение высоты списка
-                    isExpanded: true, // Растягивает поле на всю ширину
-                    dropdownColor: Colors.white, // Цвет фона списка
-                    style: const TextStyle(color: Colors.black), // Стиль текста
+                    menuMaxHeight: 200,
+                    isExpanded: true,
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(color: Colors.black),
                   ),
                   const SizedBox(height: 20),
-                  // Выпадающий список для "To" с открытием вниз
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'To',
@@ -280,15 +315,49 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     onChanged: (value) {
                       setState(() {
                         _selectedTo = value;
+                        _fetchRecommendedPrice();
                       });
                     },
                     validator: (value) => value == null ? 'Please select a city' : null,
-                    menuMaxHeight: 200, // Ограничение высоты списка
-                    isExpanded: true, // Растягивает поле на всю ширину
-                    dropdownColor: Colors.white, // Цвет фона списка
-                    style: const TextStyle(color: Colors.black), // Стиль текста
+                    menuMaxHeight: 200,
+                    isExpanded: true,
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(color: Colors.black),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
+                  if (_isFetchingPrice)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  else if (_recommendedPrice != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'Recommended Price: ${_recommendedPrice!.toStringAsFixed(0)} KZT',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'No price recommendation available ($_selectedFrom to $_selectedTo)',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 10),
                   GestureDetector(
                     onTap: _selectDate,
                     child: Container(
