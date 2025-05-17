@@ -18,7 +18,7 @@ class CreateFormScreen extends StatefulWidget {
 class _CreateFormScreenState extends State<CreateFormScreen> {
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
-  DateTime _departureTime = DateTime.now();
+  DateTime _sendTime = DateTime.now();
   final ApiService _apiService = ApiService();
   int _selectedTabIndex = 0;
   bool _isLoading = false;
@@ -120,12 +120,12 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       if (_selectedTabIndex == 0) {
         print('Creating courier post: from=$_selectedFrom, '
             'to=$_selectedTo, '
-            'departureTime=${_departureTime.toIso8601String()}, '
+            'sendTime=${_sendTime.toIso8601String()}, '
             'price=$price, description=${_descriptionController.text}');
         await _apiService.createCourierPost(
           _selectedFrom!,
           _selectedTo!,
-          _departureTime,
+          _sendTime,
           price,
           _descriptionController.text,
         ).timeout(const Duration(seconds: 10), onTimeout: () {
@@ -135,12 +135,12 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       } else {
         print('Creating sender post: from=$_selectedFrom, '
             'to=$_selectedTo, '
-            'sendTime=${_departureTime.toIso8601String()}, '
+            'sendTime=${_sendTime.toIso8601String()}, '
             'price=$price, description=${_descriptionController.text}');
         await _apiService.createSenderPost(
           _selectedFrom!,
           _selectedTo!,
-          _departureTime,
+          _sendTime,
           price,
           _descriptionController.text,
         ).timeout(const Duration(seconds: 10), onTimeout: () {
@@ -213,7 +213,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
     );
     if (pickedDate != null && mounted) {
       print('Selected date: ${pickedDate.toIso8601String()}');
-      setState(() => _departureTime = pickedDate);
+      setState(() => _sendTime = pickedDate);
     }
   }
 
@@ -436,7 +436,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Departure Date',
+                              'Send Date',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -445,7 +445,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                               ),
                             ),
                             Text(
-                              _departureTime.toString().split(' ')[0],
+                              _sendTime.toString().split(' ')[0],
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,

@@ -96,7 +96,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         type: 'courier',
         from: post.from,
         to: post.to,
-        date: post.departureTime,
+        date: post.sendTime,
         userLocation: '${post.user.name}, ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,

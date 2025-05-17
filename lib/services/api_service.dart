@@ -256,7 +256,7 @@ class ApiService {
     }
   }
 
-  Future<void> createCourierPost(String from, String to, DateTime departureTime, double pricePerParcel, String description) async {
+  Future<void> createCourierPost(String from, String to, DateTime sendTime, double pricePerParcel, String description) async {
     final token = await _getToken();
     if (token == null) throw Exception('No token found');
 
@@ -270,7 +270,7 @@ class ApiService {
         body: jsonEncode({
           'from': from,
           'to': to,
-          'departureTime': departureTime.toIso8601String(),
+          'sendTime': sendTime.toIso8601String(),
           'pricePerParcel': pricePerParcel,
           'description': description,
         }),
