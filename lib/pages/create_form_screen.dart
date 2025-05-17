@@ -68,7 +68,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   String? _selectedFrom;
   String? _selectedTo;
 
-  final Color kRedColor = Color(0xFF201731); // Matches RoutesScreen button color
+  final Color kRedColor = Color(0xFF201731);
   final BoxShadow kDefaultBoxshadow = const BoxShadow(
     color: Color(0xFFDFDFDF),
     spreadRadius: 1,
@@ -236,14 +236,14 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
         ),
       ),
       child: Scaffold(
-        backgroundColor: Color(0xFFFEF7FF), // Match RoutesScreen background
+        backgroundColor: Color(0xFFFEF7FF),
         appBar: AppBar(
           title: const Text(
             'Create Post',
             style: TextStyle(fontFamily: 'Montserrat'),
           ),
           centerTitle: true,
-          backgroundColor: Color(0xFFFEF7FF), // Match scaffold background
+          backgroundColor: Color(0xFFFEF7FF),
           elevation: 0,
           automaticallyImplyLeading: false,
         ),

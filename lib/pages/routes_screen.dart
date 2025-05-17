@@ -18,7 +18,7 @@ class RoutesScreen extends StatefulWidget {
 
 class _RoutesScreenState extends State<RoutesScreen> {
   final ApiService _apiService = ApiService();
-  Future<List<Post>>? _posts; // Remove `late` and make nullable
+  Future<List<Post>>? _posts;
   String? _currentUserId;
   int _selectedTabIndex = 0;
   String? _searchFrom;
@@ -41,7 +41,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
   @override
   void initState() {
     super.initState();
-    _posts = _loadCurrentUserId(); // Initialize immediately
+    _posts = _loadCurrentUserId();
   }
 
   Future<List<Post>> _loadCurrentUserId() async {
@@ -60,7 +60,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
           ),
         );
       }
-      return []; // Return empty list on error
+      return [];
     }
   }
 
@@ -86,6 +86,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
         postId: post.id,
         price: post.parcelPrice,
         description: post.description,
+        phoneNumber: post.user.phoneNumber,
       )));
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
@@ -98,6 +99,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
         postId: post.id,
         price: post.pricePerParcel,
         description: post.description,
+        phoneNumber: post.user.phoneNumber,
       )));
 
       print('Fetched ${senderPosts.length} sender posts and ${courierPosts.length} courier posts');
@@ -136,8 +138,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
         ),
         title: const Text(
           'Search Routes',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontFamily: 'Montserrat'),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Montserrat'),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -307,8 +308,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
           : b.date.compareTo(a.date));
     } else if (_sortBy == 'price') {
       posts.sort((a, b) => _sortAscending
-          ? (a.price ?? 0).compareTo(b.price ?? 0)
-          : (b.price ?? 0).compareTo(a.price ?? 0));
+          ? a.price.compareTo(b.price)
+          : b.price.compareTo(a.price));
     }
   }
 
@@ -435,12 +436,12 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     }
                     if (_minPrice != null) {
                       filteredPosts = filteredPosts
-                          .where((post) => (post.price ?? 0) >= _minPrice!)
+                          .where((post) => post.price >= _minPrice!)
                           .toList();
                     }
                     if (_maxPrice != null) {
                       filteredPosts = filteredPosts
-                          .where((post) => (post.price ?? 0) <= _maxPrice!)
+                          .where((post) => post.price <= _maxPrice!)
                           .toList();
                     }
 
@@ -468,6 +469,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                           to: post.to,
                           date: post.date,
                           userLocation: post.userLocation,
+                          price: post.price,
                           onMorePressed: () => PostDetailsPopup.show(context, post),
                           leading: Icon(
                             post.type == 'sender'

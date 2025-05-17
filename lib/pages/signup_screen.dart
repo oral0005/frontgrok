@@ -70,7 +70,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFEF7FF), // Background color #fef7ff
+      backgroundColor: Color(0xFFFEF7FF),
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -116,7 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   CustomButton(
                     text: 'Sign Up',
                     onPressed: _isLoading ? null : _signup,
-                    color: Color(0xFF201731), // Button background #201731
+                    color: Color(0xFF201731),
                   ),
                   const SizedBox(height: 10),
                   TextButton(

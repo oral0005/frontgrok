@@ -47,11 +47,11 @@ class _TabBarWidgetState extends State<TabBarWidget> with SingleTickerProviderSt
           indicatorColor: Color(0xFF201731),
           labelStyle: const TextStyle(
             fontFamily: 'Montserrat',
-            fontWeight: FontWeight.w600, // SemiBold for tab labels
+            fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: const TextStyle(
             fontFamily: 'Montserrat',
-            fontWeight: FontWeight.w600, // SemiBold for unselected tabs
+            fontWeight: FontWeight.w600,
           ),
           tabs: [
             Tab(text: widget.firstTab),

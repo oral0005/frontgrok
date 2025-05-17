@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class PostCard extends StatelessWidget {
@@ -6,6 +5,7 @@ class PostCard extends StatelessWidget {
   final String to;
   final DateTime date;
   final String userLocation;
+  final double price;
   final VoidCallback onMorePressed;
   final VoidCallback? onDeletePressed;
   final Widget? leading;
@@ -16,6 +16,7 @@ class PostCard extends StatelessWidget {
     required this.to,
     required this.date,
     required this.userLocation,
+    required this.price,
     required this.onMorePressed,
     this.onDeletePressed,
     this.leading,
@@ -33,6 +34,7 @@ class PostCard extends StatelessWidget {
           children: [
             Text('Date: ${date.toString().split(' ')[0]}'),
             Text('User: $userLocation'),
+            Text('Price: ${price.toStringAsFixed(2)} KZT'),
           ],
         ),
         trailing: Row(
@@ -42,7 +44,7 @@ class PostCard extends StatelessWidget {
               icon: const Icon(Icons.more_vert),
               onPressed: onMorePressed,
             ),
-            if (onDeletePressed != null) // Show delete button only if callback is provided
+            if (onDeletePressed != null)
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: onDeletePressed,

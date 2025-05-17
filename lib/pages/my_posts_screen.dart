@@ -18,7 +18,7 @@ class MyPostsScreen extends StatefulWidget {
 
 class _MyPostsScreenState extends State<MyPostsScreen> {
   final ApiService _apiService = ApiService();
-  Future<List<Post>>? _myPosts; // Remove `late` and make nullable
+  Future<List<Post>>? _myPosts;
   String? _currentUserId;
   int _selectedTabIndex = 0;
   String? _searchFrom;
@@ -41,7 +41,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   @override
   void initState() {
     super.initState();
-    _myPosts = _loadCurrentUserId(); // Initialize immediately
+    _myPosts = _loadCurrentUserId();
   }
 
   Future<List<Post>> _loadCurrentUserId() async {
@@ -64,7 +64,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           ),
         );
       }
-      return []; // Return empty list on error
+      return [];
     }
   }
 
@@ -90,6 +90,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         postId: post.id,
         price: post.parcelPrice,
         description: post.description,
+        phoneNumber: post.user.phoneNumber,
       )));
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
@@ -102,6 +103,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         postId: post.id,
         price: post.pricePerParcel,
         description: post.description,
+        phoneNumber: post.user.phoneNumber,
       )));
 
       return combinedPosts;
@@ -158,8 +160,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           : b.date.compareTo(a.date));
     } else if (_sortBy == 'price') {
       posts.sort((a, b) => _sortAscending
-          ? (a.price ?? 0).compareTo(b.price ?? 0)
-          : (b.price ?? 0).compareTo(a.price ?? 0));
+          ? (a.price).compareTo(b.price)
+          : (b.price).compareTo(a.price));
     }
   }
 
@@ -261,12 +263,12 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     }
                     if (_minPrice != null) {
                       filteredPosts = filteredPosts
-                          .where((post) => (post.price ?? 0) >= _minPrice!)
+                          .where((post) => (post.price) >= _minPrice!)
                           .toList();
                     }
                     if (_maxPrice != null) {
                       filteredPosts = filteredPosts
-                          .where((post) => (post.price ?? 0) <= _maxPrice!)
+                          .where((post) => (post.price) <= _maxPrice!)
                           .toList();
                     }
 
@@ -292,6 +294,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                           to: post.to,
                           date: post.date,
                           userLocation: post.userLocation,
+                          price: post.price,
                           onMorePressed: () => PostDetailsPopup.show(context, post),
                           onDeletePressed: () => _showDeleteConfirmationDialog(post),
                           leading: Icon(
@@ -323,8 +326,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         ),
         title: const Text(
           'Delete Post',
-          style: TextStyle(
-              fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+          style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Are you sure you want to delete the post from ${post.from} to ${post.to}?',

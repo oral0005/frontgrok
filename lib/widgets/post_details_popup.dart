@@ -18,7 +18,7 @@ class PostDetailsPopup {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  '${post.from} → ${post.to}', // Обновлено с from и to
+                  '${post.from} → ${post.to}',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -30,10 +30,11 @@ class PostDetailsPopup {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildDetailField('Type', post.type == 'sender' ? 'Sender' : 'Courier'),
-                _buildDetailField('From', post.from),           // Заменено Route на From
-                _buildDetailField('To', post.to),               // Добавлено To
+                _buildDetailField('From', post.from),
+                _buildDetailField('To', post.to),
                 _buildDetailField('Date', post.date.toString().split('.')[0]),
                 _buildDetailField('User', post.userLocation),
+                _buildDetailField('Phone Number', post.phoneNumber ?? 'Not provided'),
                 _buildDetailField('Price', '${post.price.toStringAsFixed(2)} KZT'),
                 _buildDetailField('Description', post.description.isEmpty ? 'No description' : post.description),
               ],

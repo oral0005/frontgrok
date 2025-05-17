@@ -25,14 +25,14 @@ class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFEF7FF), // Set background color to #fef7ff
+      backgroundColor: const Color(0xFFFEF7FF),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/full.png', // Logo path
-              width: 300, // Adjust size as needed
+              'assets/images/full.png',
+              width: 300,
               height: 300,
             ),
           ],

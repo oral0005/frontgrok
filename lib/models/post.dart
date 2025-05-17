@@ -1,13 +1,14 @@
 class Post {
   final String type;
-  final String from; // Новое поле
-  final String to;   // Новое поле
+  final String from;
+  final String to;
   final DateTime date;
   final String userLocation;
   final String userId;
   final String postId;
   final double price;
   final String description;
+  final String? phoneNumber;
 
   Post({
     required this.type,
@@ -19,5 +20,6 @@ class Post {
     required this.postId,
     required this.price,
     required this.description,
+    this.phoneNumber,
   });
 }

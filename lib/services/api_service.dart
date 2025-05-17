@@ -1,4 +1,4 @@
-//services/api_service.dart
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +7,7 @@ import '../models/sender_post.dart';
 import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:5000/api'; // For Android emulator
+  static const String baseUrl = 'http://10.0.2.2:5000/api';
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();

@@ -85,14 +85,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   CustomButton(
                     text: 'Login',
                     onPressed: _isLoading ? null : _login,
-                    color: Color(0xFF201731), // Button background #201731
+                    color: Color(0xFF201731),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignupScreen())),
                     child: Text(
                       'Sign Up',
-                      style: TextStyle(color: Colors.grey), // Default text color
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
                 ],

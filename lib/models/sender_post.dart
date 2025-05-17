@@ -1,10 +1,8 @@
-//models/sender_post.dart
-
-import 'package:frontgrok/models/user.dart'; // Add this import
+import 'package:frontgrok/models/user.dart';
 class SenderPost {
   final String id;
-  final String from; // Новое поле
-  final String to;   // Новое поле
+  final String from;
+  final String to;
   final DateTime sendTime;
   final double parcelPrice;
   final String description;
@@ -23,8 +21,8 @@ class SenderPost {
   factory SenderPost.fromJson(Map<String, dynamic> json) {
     return SenderPost(
       id: json['_id']?.toString() ?? '',
-      from: json['from']?.toString() ?? '', // Замена route на from
-      to: json['to']?.toString() ?? '',     // Замена route на to
+      from: json['from']?.toString() ?? '',
+      to: json['to']?.toString() ?? '',
       sendTime: DateTime.tryParse(json['sendTime']?.toString() ?? '') ?? DateTime.now(),
       parcelPrice: (json['parcelPrice'] as num?)?.toDouble() ?? 0.0,
       description: json['description']?.toString() ?? '',

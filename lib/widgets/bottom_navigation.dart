@@ -13,18 +13,18 @@ class BottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: Colors.white, // Complementary to #FEF7FF
+      backgroundColor: Colors.white,
       currentIndex: currentIndex,
       onTap: onTap,
-      selectedItemColor: Color(0xFF352C47), // Matches button color #201731
-      unselectedItemColor: Colors.grey, // Matches grey text in Login/Signup
+      selectedItemColor: Color(0xFF352C47),
+      unselectedItemColor: Colors.grey,
       selectedLabelStyle: const TextStyle(
         fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w600, // SemiBold for selected labels
+        fontWeight: FontWeight.w600,
       ),
       unselectedLabelStyle: const TextStyle(
         fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w400, // Regular for unselected labels
+        fontWeight: FontWeight.w400,
       ),
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Routes'),
