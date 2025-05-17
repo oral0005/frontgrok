@@ -29,6 +29,10 @@ class _RoutesScreenState extends State<RoutesScreen> {
   String _sortBy = 'date';
   bool _sortAscending = false;
 
+  // Class-level controllers for price fields
+  final TextEditingController _minPriceController = TextEditingController();
+  final TextEditingController _maxPriceController = TextEditingController();
+
   final List<String> _kazakhstanCities = [
     'Almaty', 'Astana', 'Shymkent', 'Karaganda', 'Aktobe', 'Taraz', 'Pavlodar',
     'Ust-Kamenogorsk', 'Semey', 'Atyrau', 'Kostanay', 'Kyzylorda', 'Uralsk',
@@ -42,6 +46,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
   void initState() {
     super.initState();
     _posts = _loadCurrentUserId();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is disposed
+    _minPriceController.dispose();
+    _maxPriceController.dispose();
+    super.dispose();
   }
 
   Future<List<Post>> _loadCurrentUserId() async {
@@ -124,10 +136,10 @@ class _RoutesScreenState extends State<RoutesScreen> {
     String? tempFrom = _searchFrom;
     String? tempTo = _searchTo;
     DateTime? tempDate = _searchDate;
-    double? tempMinPrice = _minPrice;
-    double? tempMaxPrice = _maxPrice;
-    final minPriceController = TextEditingController(text: tempMinPrice?.toString());
-    final maxPriceController = TextEditingController(text: tempMaxPrice?.toString());
+
+    // Initialize controller values
+    _minPriceController.text = _minPrice?.toString() ?? '';
+    _maxPriceController.text = _maxPrice?.toString() ?? '';
 
     showDialog(
       context: context,
@@ -228,7 +240,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
                   );
                   if (selectedDate != null) {
                     tempDate = selectedDate;
-                    setState(() {});
+                    if (mounted) {
+                      setState(() {});
+                    }
                   }
                 },
                 child: Text(
@@ -242,13 +256,13 @@ class _RoutesScreenState extends State<RoutesScreen> {
               const SizedBox(height: 16),
               CustomTextField(
                 label: 'Min Price',
-                controller: minPriceController,
+                controller: _minPriceController,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               CustomTextField(
                 label: 'Max Price',
-                controller: maxPriceController,
+                controller: _maxPriceController,
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -257,8 +271,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              minPriceController.dispose();
-              maxPriceController.dispose();
               Navigator.pop(context);
             },
             child: const Text(
@@ -268,19 +280,19 @@ class _RoutesScreenState extends State<RoutesScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              setState(() {
-                _searchFrom = tempFrom;
-                _searchTo = tempTo;
-                _searchDate = tempDate;
-                _minPrice = minPriceController.text.isNotEmpty
-                    ? double.tryParse(minPriceController.text)
-                    : null;
-                _maxPrice = maxPriceController.text.isNotEmpty
-                    ? double.tryParse(maxPriceController.text)
-                    : null;
-              });
-              minPriceController.dispose();
-              maxPriceController.dispose();
+              if (mounted) {
+                setState(() {
+                  _searchFrom = tempFrom;
+                  _searchTo = tempTo;
+                  _searchDate = tempDate;
+                  _minPrice = _minPriceController.text.isNotEmpty
+                      ? double.tryParse(_minPriceController.text)
+                      : null;
+                  _maxPrice = _maxPriceController.text.isNotEmpty
+                      ? double.tryParse(_maxPriceController.text)
+                      : null;
+                });
+              }
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
@@ -336,15 +348,17 @@ class _RoutesScreenState extends State<RoutesScreen> {
           actions: [
             PopupMenuButton<String>(
               onSelected: (value) {
-                setState(() {
-                  if (value == 'date_asc' || value == 'date_desc') {
-                    _sortBy = 'date';
-                    _sortAscending = value == 'date_asc';
-                  } else if (value == 'price_asc' || value == 'price_desc') {
-                    _sortBy = 'price';
-                    _sortAscending = value == 'price_asc';
-                  }
-                });
+                if (mounted) {
+                  setState(() {
+                    if (value == 'date_asc' || value == 'date_desc') {
+                      _sortBy = 'date';
+                      _sortAscending = value == 'date_asc';
+                    } else if (value == 'price_asc' || value == 'price_desc') {
+                      _sortBy = 'price';
+                      _sortAscending = value == 'price_asc';
+                    }
+                  });
+                }
               },
               itemBuilder: (context) => [
                 const PopupMenuItem(
@@ -376,7 +390,11 @@ class _RoutesScreenState extends State<RoutesScreen> {
             TabBarWidget(
               firstTab: 'Courier Posts',
               secondTab: 'Sender Posts',
-              onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+              onTabChanged: (index) {
+                if (mounted) {
+                  setState(() => _selectedTabIndex = index);
+                }
+              },
             ),
             Expanded(
               child: RefreshIndicator(
@@ -419,12 +437,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
                         'Filtered ${_selectedTabIndex == 0 ? 'courier' : 'sender'} posts: ${filteredPosts.length}');
 
                     if (_searchFrom != null) {
-                      filteredPosts =
-                          filteredPosts.where((post) => post.from == _searchFrom).toList();
+                      filteredPosts = filteredPosts
+                          .where((post) => post.from == _searchFrom)
+                          .toList();
                     }
                     if (_searchTo != null) {
-                      filteredPosts =
-                          filteredPosts.where((post) => post.to == _searchTo).toList();
+                      filteredPosts = filteredPosts
+                          .where((post) => post.to == _searchTo)
+                          .toList();
                     }
                     if (_searchDate != null) {
                       filteredPosts = filteredPosts
@@ -470,7 +490,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                           date: post.date,
                           userLocation: post.userLocation,
                           price: post.price,
-                          onMorePressed: () => PostDetailsPopup.show(context, post),
+                          onMorePressed: () =>
+                              PostDetailsPopup.show(context, post),
                           leading: Icon(
                             post.type == 'sender'
                                 ? Icons.send
