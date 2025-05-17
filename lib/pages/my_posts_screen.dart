@@ -18,7 +18,7 @@ class MyPostsScreen extends StatefulWidget {
 
 class _MyPostsScreenState extends State<MyPostsScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<Post>> _myPosts;
+  Future<List<Post>>? _myPosts; // Remove `late` and make nullable
   String? _currentUserId;
   int _selectedTabIndex = 0;
   String? _searchFrom;
@@ -26,56 +26,25 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   DateTime? _searchDate;
   double? _minPrice;
   double? _maxPrice;
-  String _sortBy = 'date'; // Default sort by date
-  bool _sortAscending = false; // Default descending
+  String _sortBy = 'date';
+  bool _sortAscending = false;
 
   final List<String> _kazakhstanCities = [
-    'Almaty',
-    'Astana',
-    'Shymkent',
-    'Karaganda',
-    'Aktobe',
-    'Taraz',
-    'Pavlodar',
-    'Ust-Kamenogorsk',
-    'Semey',
-    'Atyrau',
-    'Kostanay',
-    'Kyzylorda',
-    'Uralsk',
-    'Petropavl',
-    'Aktau',
-    'Temirtau',
-    'Turkestan',
-    'Taldykorgan',
-    'Ekibastuz',
-    'Rudny',
-    'Zhanaozen',
-    'Zhezkazgan',
-    'Kentau',
-    'Balkhash',
-    'Satbayev',
-    'Kokshetau',
-    'Saran',
-    'Shakhtinsk',
-    'Ridder',
-    'Arkalyk',
-    'Lisakovsk',
-    'Aral',
-    'Zhetisay',
-    'Saryagash',
-    'Aksu',
-    'Stepnogorsk',
-    'Kapchagay',
+    'Almaty', 'Astana', 'Shymkent', 'Karaganda', 'Aktobe', 'Taraz', 'Pavlodar',
+    'Ust-Kamenogorsk', 'Semey', 'Atyrau', 'Kostanay', 'Kyzylorda', 'Uralsk',
+    'Petropavl', 'Aktau', 'Temirtau', 'Turkestan', 'Taldykorgan', 'Ekibastuz',
+    'Rudny', 'Zhanaozen', 'Zhezkazgan', 'Kentau', 'Balkhash', 'Satbayev',
+    'Kokshetau', 'Saran', 'Shakhtinsk', 'Ridder', 'Arkalyk', 'Lisakovsk', 'Aral',
+    'Zhetisay', 'Saryagash', 'Aksu', 'Stepnogorsk', 'Kapchagay',
   ];
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentUserId();
+    _myPosts = _loadCurrentUserId(); // Initialize immediately
   }
 
-  Future<void> _loadCurrentUserId() async {
+  Future<List<Post>> _loadCurrentUserId() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _currentUserId = prefs.getString('userId');
@@ -83,8 +52,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
       if (_currentUserId == null) {
         print('Warning: userId is null. User might not be logged in.');
       }
-      _myPosts = _fetchMyPosts();
-      if (mounted) setState(() {});
+      return await _fetchMyPosts();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +64,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           ),
         );
       }
+      return []; // Return empty list on error
     }
   }
 
@@ -184,7 +153,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
   void _sortPosts(List<Post> posts) {
     if (_sortBy == 'date') {
-      posts.sort((a, b) => _sortAscending ? a.date.compareTo(b.date) : b.date.compareTo(a.date));
+      posts.sort((a, b) => _sortAscending
+          ? a.date.compareTo(b.date)
+          : b.date.compareTo(a.date));
     } else if (_sortBy == 'price') {
       posts.sort((a, b) => _sortAscending
           ? (a.price ?? 0).compareTo(b.price ?? 0)
@@ -258,7 +229,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                         ),
                       );
                     }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    final posts = snapshot.data ?? [];
+                    if (posts.isEmpty) {
                       return const Center(
                         child: Text(
                           'You have no posts yet',
@@ -267,38 +239,54 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                       );
                     }
 
-                    var posts = _selectedTabIndex == 0
-                        ? snapshot.data!.where((post) => post.type == 'courier').toList()
-                        : snapshot.data!.where((post) => post.type == 'sender').toList();
+                    var filteredPosts = _selectedTabIndex == 0
+                        ? posts.where((post) => post.type == 'courier').toList()
+                        : posts.where((post) => post.type == 'sender').toList();
 
-                    // Apply search filters
-                    if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
-                    if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
+                    if (_searchFrom != null) {
+                      filteredPosts =
+                          filteredPosts.where((post) => post.from == _searchFrom).toList();
+                    }
+                    if (_searchTo != null) {
+                      filteredPosts =
+                          filteredPosts.where((post) => post.to == _searchTo).toList();
+                    }
                     if (_searchDate != null) {
-                      posts = posts.where((post) =>
+                      filteredPosts = filteredPosts
+                          .where((post) =>
                       post.date.year == _searchDate!.year &&
                           post.date.month == _searchDate!.month &&
-                          post.date.day == _searchDate!.day).toList();
+                          post.date.day == _searchDate!.day)
+                          .toList();
                     }
-                    if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
-                    if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
+                    if (_minPrice != null) {
+                      filteredPosts = filteredPosts
+                          .where((post) => (post.price ?? 0) >= _minPrice!)
+                          .toList();
+                    }
+                    if (_maxPrice != null) {
+                      filteredPosts = filteredPosts
+                          .where((post) => (post.price ?? 0) <= _maxPrice!)
+                          .toList();
+                    }
 
-                    // Apply sorting
-                    _sortPosts(posts);
+                    _sortPosts(filteredPosts);
 
-                    if (posts.isEmpty) {
+                    if (filteredPosts.isEmpty) {
                       return Center(
                         child: Text(
-                          _selectedTabIndex == 0 ? 'No courier posts available' : 'No sender posts available',
+                          _selectedTabIndex == 0
+                              ? 'No courier posts available'
+                              : 'No sender posts available',
                           style: const TextStyle(fontFamily: 'Montserrat'),
                         ),
                       );
                     }
 
                     return ListView.builder(
-                      itemCount: posts.length,
+                      itemCount: filteredPosts.length,
                       itemBuilder: (context, index) {
-                        final post = posts[index];
+                        final post = filteredPosts[index];
                         return PostCard(
                           from: post.from,
                           to: post.to,
@@ -307,7 +295,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                           onMorePressed: () => PostDetailsPopup.show(context, post),
                           onDeletePressed: () => _showDeleteConfirmationDialog(post),
                           leading: Icon(
-                            post.type == 'sender' ? Icons.send : Icons.local_shipping,
+                            post.type == 'sender'
+                                ? Icons.send
+                                : Icons.local_shipping,
                             color: const Color(0xFF201731),
                           ),
                         );
@@ -333,7 +323,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         ),
         title: const Text(
           'Delete Post',
-          style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Are you sure you want to delete the post from ${post.from} to ${post.to}?',
