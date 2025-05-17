@@ -25,7 +25,6 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   double? _recommendedPrice;
   bool _isFetchingPrice = false;
 
-  // Список городов Казахстана с населением более 50,000
   final List<String> _kazakhstanCities = [
     'Almaty',
     'Astana',
@@ -69,7 +68,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   String? _selectedFrom;
   String? _selectedTo;
 
-  final Color kRedColor = Colors.red;
+  final Color kRedColor = Color(0xFF201731); // Matches RoutesScreen button color
   final BoxShadow kDefaultBoxshadow = const BoxShadow(
     color: Color(0xFFDFDFDF),
     spreadRadius: 1,
@@ -154,7 +153,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       widget.onPostCreated?.call();
 
       if (mounted) {
-        print('Navigating to MyPostsScreen');
+        print('Navigating to HomeScreen');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -179,7 +178,14 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
 
   void _showSnackBar(String message) {
     print('Showing SnackBar: $message');
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'Montserrat'),
+        ),
+      ),
+    );
   }
 
   Future<void> _selectDate() async {
@@ -191,8 +197,12 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Colors.red,
+            textTheme: Theme.of(context).textTheme.apply(
+              fontFamily: 'Montserrat',
+              fontFamilyFallback: ['Roboto'],
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFF201731),
               onPrimary: Colors.white,
             ),
             dialogBackgroundColor: Colors.white,
@@ -218,193 +228,259 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
   @override
   Widget build(BuildContext context) {
     print('Building CreateFormScreen');
-    return Scaffold(
-      appBar: AppBar(title: const Text('Create Post')),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  AppinioAnimatedToggleTab(
-                    duration: const Duration(milliseconds: 150),
-                    offset: 0,
-                    callback: (int index) {
-                      print('Tab switched to index: $index');
-                      setState(() {
-                        _selectedTabIndex = index;
-                        // Больше не нужно вызывать _fetchRecommendedPrice при смене вкладки,
-                        // так как postType не влияет на запрос
-                      });
-                    },
-                    tabTexts: const ['Courier Posts', 'Sender Posts'],
-                    height: 40,
-                    width: MediaQuery.of(context).size.width - 32,
-                    boxDecoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                      boxShadow: [kDefaultBoxshadow],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: 'Montserrat',
+          fontFamilyFallback: ['Roboto'],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Color(0xFFFEF7FF), // Match RoutesScreen background
+        appBar: AppBar(
+          title: const Text(
+            'Create Post',
+            style: TextStyle(fontFamily: 'Montserrat'),
+          ),
+          centerTitle: true,
+          backgroundColor: Color(0xFFFEF7FF), // Match scaffold background
+          elevation: 0,
+          automaticallyImplyLeading: false,
+        ),
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    AppinioAnimatedToggleTab(
+                      duration: const Duration(milliseconds: 150),
+                      offset: 0,
+                      callback: (int index) {
+                        print('Tab switched to index: $index');
+                        setState(() {
+                          _selectedTabIndex = index;
+                        });
+                      },
+                      tabTexts: const ['Courier Posts', 'Sender Posts'],
+                      height: 40,
+                      width: MediaQuery.of(context).size.width - 32,
+                      boxDecoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5),
+                        boxShadow: [kDefaultBoxshadow],
+                      ),
+                      animatedBoxDecoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFc3d2db).withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                        color: kRedColor, // #201731
+                        borderRadius: const BorderRadius.all(Radius.circular(5)),
+                        border: Border.all(color: Colors.grey, width: 1),
+                      ),
+                      activeStyle: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Montserrat',
+                      ),
+                      inactiveStyle: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Montserrat',
+                      ),
                     ),
-                    animatedBoxDecoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFc3d2db).withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                          offset: const Offset(2, 2),
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: 'From',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
-                      color: kRedColor,
-                      borderRadius: const BorderRadius.all(Radius.circular(5)),
-                      border: Border.all(color: Colors.grey, width: 1),
-                    ),
-                    activeStyle: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    inactiveStyle: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'From',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    value: _selectedFrom,
-                    items: _kazakhstanCities.map((city) {
-                      return DropdownMenuItem<String>(
-                        value: city,
-                        child: Text(city),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedFrom = value;
-                        _fetchRecommendedPrice();
-                      });
-                    },
-                    validator: (value) => value == null ? 'Please select a city' : null,
-                    menuMaxHeight: 200,
-                    isExpanded: true,
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'To',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    value: _selectedTo,
-                    items: _kazakhstanCities.map((city) {
-                      return DropdownMenuItem<String>(
-                        value: city,
-                        child: Text(city),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedTo = value;
-                        _fetchRecommendedPrice();
-                      });
-                    },
-                    validator: (value) => value == null ? 'Please select a city' : null,
-                    menuMaxHeight: 200,
-                    isExpanded: true,
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  const SizedBox(height: 10),
-                  if (_isFetchingPrice)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  else if (_recommendedPrice != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        'Recommended Price: ${_recommendedPrice!.toStringAsFixed(0)} KZT',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade600),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Color(0xFF201731)),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        labelStyle: const TextStyle(
+                          fontFamily: 'Montserrat',
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        'No price recommendation available ($_selectedFrom to $_selectedTo)',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
+                      value: _selectedFrom,
+                      items: _kazakhstanCities
+                          .map((city) => DropdownMenuItem(
+                        value: city,
+                        child: Text(
+                          city,
+                          style: const TextStyle(fontFamily: 'Montserrat'),
+                        ),
+                      ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedFrom = value;
+                          _fetchRecommendedPrice();
+                        });
+                      },
+                      validator: (value) => value == null ? 'Please select a city' : null,
+                      menuMaxHeight: 200,
+                      isExpanded: true,
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: 'To',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade600),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Color(0xFF201731)),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        labelStyle: const TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      value: _selectedTo,
+                      items: _kazakhstanCities
+                          .map((city) => DropdownMenuItem(
+                        value: city,
+                        child: Text(
+                          city,
+                          style: const TextStyle(fontFamily: 'Montserrat'),
+                        ),
+                      ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedTo = value;
+                          _fetchRecommendedPrice();
+                        });
+                      },
+                      validator: (value) => value == null ? 'Please select a city' : null,
+                      menuMaxHeight: 200,
+                      isExpanded: true,
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
+                    ),
+                    const SizedBox(height: 10),
+                    if (_isFetchingPrice)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    else if (_recommendedPrice != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'Recommended Price: ${_recommendedPrice!.toStringAsFixed(0)} KZT',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'No price recommendation available ($_selectedFrom to $_selectedTo)',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: _selectDate,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade600),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Departure Date',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              _departureTime.toString().split(' ')[0],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: _selectDate,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Departure Date',
-                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                          ),
-                          Text(
-                            _departureTime.toString().split(' ')[0],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'Description',
+                      controller: _descriptionController,
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(label: 'Description', controller: _descriptionController),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: _selectedTabIndex == 0 ? 'Delivery Price' : 'Parcel Price',
-                    controller: _priceController,
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 20),
-                  CustomButton(
-                    text: 'Save',
-                    onPressed: _isLoading ? null : _createPost,
-                    color: Colors.red,
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: _selectedTabIndex == 0 ? 'Delivery Price' : 'Parcel Price',
+                      controller: _priceController,
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomButton(
+                      text: 'Save',
+                      onPressed: _isLoading ? null : _createPost,
+                      color: Color(0xFF201731),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (_isLoading) const Center(child: CircularProgressIndicator()),
-        ],
+            if (_isLoading) const Center(child: CircularProgressIndicator()),
+          ],
+        ),
       ),
     );
   }

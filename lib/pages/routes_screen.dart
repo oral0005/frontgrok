@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/post_card.dart';
@@ -7,6 +8,7 @@ import '../models/sender_post.dart';
 import '../models/post.dart';
 import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
+import '../widgets/custom_text_field.dart';
 
 class RoutesScreen extends StatefulWidget {
   const RoutesScreen({super.key});
@@ -25,47 +27,18 @@ class _RoutesScreenState extends State<RoutesScreen> {
   DateTime? _searchDate;
   double? _minPrice;
   double? _maxPrice;
-  String _sortBy = 'date'; // Default sort by date
-  bool _sortAscending = false; // Default descending
+  String _sortBy = 'date';
+  bool _sortAscending = false;
 
   final List<String> _kazakhstanCities = [
-    'Almaty',
-    'Astana',
-    'Shymkent',
-    'Karaganda',
-    'Aktobe',
-    'Taraz',
-    'Pavlodar',
-    'Ust-Kamenogorsk',
-    'Semey',
-    'Atyrau',
-    'Kostanay',
-    'Kyzylorda',
-    'Uralsk',
-    'Petropavl',
-    'Aktau',
-    'Temirtau',
-    'Turkestan',
-    'Taldykorgan',
-    'Ekibastuz',
-    'Rudny',
-    'Zhanaozen',
-    'Zhezkazgan',
-    'Kentau',
-    'Balkhash',
-    'Satbayev',
-    'Kokshetau',
-    'Saran',
-    'Shakhtinsk',
-    'Ridder',
-    'Arkalyk',
-    'Lisakovsk',
-    'Aral',
-    'Zhetisay',
-    'Saryagash',
-    'Aksu',
-    'Stepnogorsk',
-    'Kapchagay',
+    'Almaty', 'Astana', 'Shymkent', 'Karaganda', 'Aktobe',
+    'Taraz', 'Pavlodar', 'Ust-Kamenogorsk', 'Semey', 'Atyrau',
+    'Kostanay', 'Kyzylorda', 'Uralsk', 'Petropavl', 'Aktau',
+    'Temirtau', 'Turkestan', 'Taldykorgan', 'Ekibastuz', 'Rudny',
+    'Zhanaozen', 'Zhezkazgan', 'Kentau', 'Balkhash', 'Satbayev',
+    'Kokshetau', 'Saran', 'Shakhtinsk', 'Ridder', 'Arkalyk',
+    'Lisakovsk', 'Aral', 'Zhetisay', 'Saryagash', 'Aksu',
+    'Stepnogorsk', 'Kapchagay',
   ];
 
   @override
@@ -123,8 +96,12 @@ class _RoutesScreenState extends State<RoutesScreen> {
         description: post.description,
       )));
 
+      // Debug: Log the number of posts fetched
+      print('Fetched ${senderPosts.length} sender posts and ${courierPosts.length} courier posts');
+
       return combinedPosts;
     } catch (e) {
+      print('Error fetching posts: $e');
       throw Exception('Failed to load posts: $e');
     }
   }
@@ -144,11 +121,20 @@ class _RoutesScreenState extends State<RoutesScreen> {
     DateTime? tempDate = _searchDate;
     double? tempMinPrice = _minPrice;
     double? tempMaxPrice = _maxPrice;
+    final minPriceController = TextEditingController(text: tempMinPrice?.toString());
+    final maxPriceController = TextEditingController(text: tempMaxPrice?.toString());
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Search Routes'),
+        backgroundColor: Color(0xFFFEF7FF),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+          'Search Routes',
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Montserrat'),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -156,79 +142,141 @@ class _RoutesScreenState extends State<RoutesScreen> {
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: 'From',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade700),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFF201731)),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  labelStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
                 ),
                 value: tempFrom,
-                items: _kazakhstanCities.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+                items: _kazakhstanCities
+                    .map((city) => DropdownMenuItem(
+                  value: city,
+                  child: Text(city, style: const TextStyle(fontFamily: 'Montserrat')),
+                ))
+                    .toList(),
                 onChanged: (value) => tempFrom = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: 'To',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade700),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFF201731)),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  labelStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
                 ),
                 value: tempTo,
-                items: _kazakhstanCities.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+                items: _kazakhstanCities
+                    .map((city) => DropdownMenuItem(
+                  value: city,
+                  child: Text(city, style: const TextStyle(fontFamily: 'Montserrat')),
+                ))
+                    .toList(),
                 onChanged: (value) => tempTo = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () async {
                   final selectedDate = await showDatePicker(
                     context: context,
                     initialDate: tempDate ?? DateTime.now(),
-                    firstDate: DateTime.now(), // Ограничиваем выбор дат прошлым
+                    firstDate: DateTime.now(),
                     lastDate: DateTime(2030),
                   );
-                  if (selectedDate != null) tempDate = selectedDate;
+                  if (selectedDate != null) {
+                    tempDate = selectedDate;
+                    setState(() {});
+                  }
                 },
-                child: Text(tempDate == null ? 'Select Date' : 'Date: ${tempDate.toString().substring(0, 10)}'),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Min Price',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                child: Text(
+                  tempDate == null
+                      ? 'Select Date'
+                      : 'Date: ${tempDate.toString().substring(0, 10)}',
+                  style: const TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
                 ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) => tempMinPrice = value.isNotEmpty ? double.tryParse(value) : null,
               ),
-              const SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Max Price',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                label: 'Min Price',
+                controller: minPriceController,
                 keyboardType: TextInputType.number,
-                onChanged: (value) => tempMaxPrice = value.isNotEmpty ? double.tryParse(value) : null,
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                label: 'Max Price',
+                controller: maxPriceController,
+                keyboardType: TextInputType.number,
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              minPriceController.dispose();
+              maxPriceController.dispose();
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
               setState(() {
                 _searchFrom = tempFrom;
                 _searchTo = tempTo;
                 _searchDate = tempDate;
-                _minPrice = tempMinPrice;
-                _maxPrice = tempMaxPrice;
+                _minPrice = minPriceController.text.isNotEmpty ? double.tryParse(minPriceController.text) : null;
+                _maxPrice = maxPriceController.text.isNotEmpty ? double.tryParse(maxPriceController.text) : null;
               });
+              minPriceController.dispose();
+              maxPriceController.dispose();
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-            child: const Text('Search'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF201731),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text(
+              'Search',
+              style: TextStyle(fontFamily: 'Montserrat'),
+            ),
           ),
         ],
       ),
@@ -247,109 +295,140 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Routes'),
-        actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: _showSearchDialog),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                if (value == 'date_asc' || value == 'date_desc') {
-                  _sortBy = 'date';
-                  _sortAscending = value == 'date_asc';
-                } else if (value == 'price_asc' || value == 'price_desc') {
-                  _sortBy = 'price';
-                  _sortAscending = value == 'price_asc';
-                }
-              });
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'date_desc', child: Text('Sort by Date (Newest First)')),
-              const PopupMenuItem(value: 'date_asc', child: Text('Sort by Date (Oldest First)')),
-              const PopupMenuItem(value: 'price_asc', child: Text('Sort by Price (Low to High)')),
-              const PopupMenuItem(value: 'price_desc', child: Text('Sort by Price (High to Low)')),
-            ],
-          ),
-        ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: 'Montserrat',
+          fontFamilyFallback: ['Roboto'],
+        ),
       ),
-      body: Column(
-        children: [
-          TabBarWidget(
-            firstTab: 'Courier Posts',
-            secondTab: 'Sender Posts',
-            onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+      child: Scaffold(
+        backgroundColor: Color(0xFFFEF7FF),
+        appBar: AppBar(
+          title: const Text('Routes', style: TextStyle(fontFamily: 'Montserrat')),
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: _showSearchDialog,
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshPosts,
-              child: FutureBuilder<List<Post>>(
-                future: _posts,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                setState(() {
+                  if (value == 'date_asc' || value == 'date_desc') {
+                    _sortBy = 'date';
+                    _sortAscending = value == 'date_asc';
+                  } else if (value == 'price_asc' || value == 'price_desc') {
+                    _sortBy = 'price';
+                    _sortAscending = value == 'price_asc';
                   }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No posts available'));
-                  }
+                });
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'date_desc',
+                  child: Text('Sort by Date (Newest First)', style: TextStyle(fontFamily: 'Montserrat')),
+                ),
+                const PopupMenuItem(
+                  value: 'date_asc',
+                  child: Text('Sort by Date (Oldest First)', style: TextStyle(fontFamily: 'Montserrat')),
+                ),
+                const PopupMenuItem(
+                  value: 'price_asc',
+                  child: Text('Sort by Price (Low to High)', style: TextStyle(fontFamily: 'Montserrat')),
+                ),
+                const PopupMenuItem(
+                  value: 'price_desc',
+                  child: Text('Sort by Price (High to Low)', style: TextStyle(fontFamily: 'Montserrat')),
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            TabBarWidget(
+              firstTab: 'Courier Posts',
+              secondTab: 'Sender Posts',
+              onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refreshPosts,
+                child: FutureBuilder<List<Post>>(
+                  future: _posts,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      print('Snapshot error: ${snapshot.error}');
+                      return Center(
+                        child: Text('Error: ${snapshot.error}', style: const TextStyle(fontFamily: 'Montserrat')),
+                      );
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      print('No posts available in snapshot');
+                      return const Center(
+                        child: Text('No posts available', style: TextStyle(fontFamily: 'Montserrat')),
+                      );
+                    }
 
-                  // Фильтрация постов
-                  var posts = _selectedTabIndex == 0
-                      ? snapshot.data!.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
-                      : snapshot.data!.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
+                    var posts = _selectedTabIndex == 0
+                        ? snapshot.data!.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
+                        : snapshot.data!.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
 
-                  // Фильтр для исключения прошедших постов
-                  final now = DateTime.now();
-                  posts = posts.where((post) => post.date.isAfter(now)).toList();
+                    // Debug: Log the number of filtered posts
+                    print('Filtered ${_selectedTabIndex == 0 ? 'courier' : 'sender'} posts: ${posts.length}');
 
-                  // Применение поисковых фильтров
-                  if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
-                  if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
-                  if (_searchDate != null) {
-                    posts = posts.where((post) =>
-                    post.date.year == _searchDate!.year &&
-                        post.date.month == _searchDate!.month &&
-                        post.date.day == _searchDate!.day).toList();
-                  }
-                  if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
-                  if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
+                    // Apply search filters
+                    if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
+                    if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
+                    if (_searchDate != null) {
+                      posts = posts.where((post) =>
+                      post.date.year == _searchDate!.year &&
+                          post.date.month == _searchDate!.month &&
+                          post.date.day == _searchDate!.day).toList();
+                    }
+                    if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
+                    if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
 
-                  // Применение сортировки
-                  _sortPosts(posts);
+                    _sortPosts(posts);
 
-                  if (posts.isEmpty) {
-                    return Center(
-                      child: Text(_selectedTabIndex == 0
-                          ? 'No courier posts available'
-                          : 'No sender posts available'),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index];
-                      return PostCard(
-                        from: post.from,
-                        to: post.to,
-                        date: post.date,
-                        userLocation: post.userLocation,
-                        onMorePressed: () => PostDetailsPopup.show(context, post),
-                        leading: Icon(
-                          post.type == 'sender' ? Icons.send : Icons.local_shipping,
-                          color: post.type == 'sender' ? Colors.blue : Colors.green,
+                    if (posts.isEmpty) {
+                      print('No posts after filtering for ${_selectedTabIndex == 0 ? 'courier' : 'sender'}');
+                      return Center(
+                        child: Text(
+                          _selectedTabIndex == 0 ? 'No courier posts available' : 'No sender posts available',
+                          style: const TextStyle(fontFamily: 'Montserrat'),
                         ),
                       );
-                    },
-                  );
-                },
+                    }
+
+                    return ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return PostCard(
+                          from: post.from,
+                          to: post.to,
+                          date: post.date,
+                          userLocation: post.userLocation,
+                          onMorePressed: () => PostDetailsPopup.show(context, post),
+                          leading: Icon(
+                            post.type == 'sender' ? Icons.send : Icons.local_shipping,
+                            color: Color(0xFF201731),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

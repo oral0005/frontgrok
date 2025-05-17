@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/post_card.dart';
@@ -8,6 +7,7 @@ import '../models/sender_post.dart';
 import '../models/post.dart';
 import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
+import '../widgets/custom_text_field.dart';
 
 class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({super.key});
@@ -87,7 +87,14 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
       if (mounted) setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading user: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error loading user: $e',
+              style: const TextStyle(fontFamily: 'Montserrat'),
+            ),
+          ),
+        );
       }
     }
   }
@@ -150,122 +157,29 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
       } else {
         await _apiService.deleteCourierPost(post.postId);
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post deleted successfully')),
-      );
-      // Refresh the posts list after deletion
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Post deleted successfully',
+              style: TextStyle(fontFamily: 'Montserrat'),
+            ),
+          ),
+        );
+      }
       _refreshPosts();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting post: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error deleting post: $e',
+              style: const TextStyle(fontFamily: 'Montserrat'),
+            ),
+          ),
+        );
+      }
     }
-  }
-
-  void _showSearchDialog() {
-    String? tempFrom = _searchFrom;
-    String? tempTo = _searchTo;
-    DateTime? tempDate = _searchDate;
-    double? tempMinPrice = _minPrice;
-    double? tempMaxPrice = _maxPrice;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Search My Posts'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'From',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                value: tempFrom,
-                items: _kazakhstanCities
-                    .map((city) => DropdownMenuItem(value: city, child: Text(city)))
-                    .toList(),
-                onChanged: (value) => tempFrom = value,
-                menuMaxHeight: 200,
-                isExpanded: true,
-                dropdownColor: Colors.white,
-                style: const TextStyle(color: Colors.black),
-              ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'To',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                value: tempTo,
-                items: _kazakhstanCities
-                    .map((city) => DropdownMenuItem(value: city, child: Text(city)))
-                    .toList(),
-                onChanged: (value) => tempTo = value,
-                menuMaxHeight: 200,
-                isExpanded: true,
-                dropdownColor: Colors.white,
-                style: const TextStyle(color: Colors.black),
-              ),
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () async {
-                  final selectedDate = await showDatePicker(
-                    context: context,
-                    initialDate: tempDate ?? DateTime.now(),
-                    firstDate: DateTime.now(), // Restrict to future dates
-                    lastDate: DateTime(2030),
-                  );
-                  if (selectedDate != null) tempDate = selectedDate;
-                },
-                child: Text(tempDate == null
-                    ? 'Select Date'
-                    : 'Date: ${tempDate.toString().substring(0, 10)}'),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Min Price',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) =>
-                tempMinPrice = value.isNotEmpty ? double.tryParse(value) : null,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Max Price',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) =>
-                tempMaxPrice = value.isNotEmpty ? double.tryParse(value) : null,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _searchFrom = tempFrom;
-                _searchTo = tempTo;
-                _searchDate = tempDate;
-                _minPrice = tempMinPrice;
-                _maxPrice = tempMaxPrice;
-              });
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
-            child: const Text('Search'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _sortPosts(List<Post> posts) {
@@ -280,122 +194,131 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Posts'),
-        actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: _showSearchDialog),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                if (value == 'date_asc' || value == 'date_desc') {
-                  _sortBy = 'date';
-                  _sortAscending = value == 'date_asc';
-                } else if (value == 'price_asc' || value == 'price_desc') {
-                  _sortBy = 'price';
-                  _sortAscending = value == 'price_asc';
-                }
-              });
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'date_desc', child: Text('Sort by Date (Newest First)')),
-              const PopupMenuItem(value: 'date_asc', child: Text('Sort by Date (Oldest First)')),
-              const PopupMenuItem(value: 'price_asc', child: Text('Sort by Price (Low to High)')),
-              const PopupMenuItem(value: 'price_desc', child: Text('Sort by Price (High to Low)')),
-            ],
-          ),
-        ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: 'Montserrat',
+          fontFamilyFallback: ['Roboto'],
+        ),
       ),
-      body: Column(
-        children: [
-          TabBarWidget(
-            firstTab: 'Courier Posts',
-            secondTab: 'Sender Posts',
-            onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFEF7FF),
+        appBar: AppBar(
+          title: const Text(
+            'My Posts',
+            style: TextStyle(fontFamily: 'Montserrat'),
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshPosts,
-              child: FutureBuilder<List<Post>>(
-                future: _myPosts,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Error: ${snapshot.error}', textAlign: TextAlign.center),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: _refreshPosts,
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('You have no posts yet'));
-                  }
-
-                  final now = DateTime.now();
-                  var posts = _selectedTabIndex == 0
-                      ? snapshot.data!
-                      .where((post) => post.type == 'courier' && post.date.isAfter(now))
-                      .toList()
-                      : snapshot.data!
-                      .where((post) => post.type == 'sender' && post.date.isAfter(now))
-                      .toList();
-
-                  // Apply search filters
-                  if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
-                  if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
-                  if (_searchDate != null) {
-                    posts = posts.where((post) =>
-                    post.date.year == _searchDate!.year &&
-                        post.date.month == _searchDate!.month &&
-                        post.date.day == _searchDate!.day).toList();
-                  }
-                  if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
-                  if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
-
-                  // Apply sorting
-                  _sortPosts(posts);
-
-                  if (posts.isEmpty) {
-                    return Center(
-                      child: Text(_selectedTabIndex == 0
-                          ? 'No courier posts available'
-                          : 'No sender posts available'),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index];
-                      return PostCard(
-                        from: post.from,
-                        to: post.to,
-                        date: post.date,
-                        userLocation: post.userLocation,
-                        onMorePressed: () => PostDetailsPopup.show(context, post),
-                        onDeletePressed: () => _showDeleteConfirmationDialog(post),
-                        leading: Icon(
-                          post.type == 'sender' ? Icons.send : Icons.local_shipping,
-                          color: post.type == 'sender' ? Colors.blue : Colors.green,
+          centerTitle: true,
+          backgroundColor: const Color(0xFFFEF7FF),
+          elevation: 0,
+          automaticallyImplyLeading: false,
+        ),
+        body: Column(
+          children: [
+            TabBarWidget(
+              firstTab: 'Courier Posts',
+              secondTab: 'Sender Posts',
+              onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refreshPosts,
+                child: FutureBuilder<List<Post>>(
+                  future: _myPosts,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Error: ${snapshot.error}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontFamily: 'Montserrat'),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _refreshPosts,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF201731),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Retry',
+                                style: TextStyle(fontFamily: 'Montserrat'),
+                              ),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  );
-                },
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'You have no posts yet',
+                          style: TextStyle(fontFamily: 'Montserrat'),
+                        ),
+                      );
+                    }
+
+                    var posts = _selectedTabIndex == 0
+                        ? snapshot.data!.where((post) => post.type == 'courier').toList()
+                        : snapshot.data!.where((post) => post.type == 'sender').toList();
+
+                    // Apply search filters
+                    if (_searchFrom != null) posts = posts.where((post) => post.from == _searchFrom).toList();
+                    if (_searchTo != null) posts = posts.where((post) => post.to == _searchTo).toList();
+                    if (_searchDate != null) {
+                      posts = posts.where((post) =>
+                      post.date.year == _searchDate!.year &&
+                          post.date.month == _searchDate!.month &&
+                          post.date.day == _searchDate!.day).toList();
+                    }
+                    if (_minPrice != null) posts = posts.where((post) => (post.price ?? 0) >= _minPrice!).toList();
+                    if (_maxPrice != null) posts = posts.where((post) => (post.price ?? 0) <= _maxPrice!).toList();
+
+                    // Apply sorting
+                    _sortPosts(posts);
+
+                    if (posts.isEmpty) {
+                      return Center(
+                        child: Text(
+                          _selectedTabIndex == 0 ? 'No courier posts available' : 'No sender posts available',
+                          style: const TextStyle(fontFamily: 'Montserrat'),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return PostCard(
+                          from: post.from,
+                          to: post.to,
+                          date: post.date,
+                          userLocation: post.userLocation,
+                          onMorePressed: () => PostDetailsPopup.show(context, post),
+                          onDeletePressed: () => _showDeleteConfirmationDialog(post),
+                          leading: Icon(
+                            post.type == 'sender' ? Icons.send : Icons.local_shipping,
+                            color: const Color(0xFF201731),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -404,21 +327,43 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Post'),
-        content: Text('Are you sure you want to delete the post from ${post.from} to ${post.to}?'),
+        backgroundColor: const Color(0xFFFEF7FF),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+          'Delete Post',
+          style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Are you sure you want to delete the post from ${post.from} to ${post.to}?',
+          style: const TextStyle(fontFamily: 'Montserrat'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              _deletePost(post); // Perform deletion
+              Navigator.pop(context);
+              _deletePost(post);
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
-            child: const Text('Delete'),
+              backgroundColor: const Color(0xFF201731),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(fontFamily: 'Montserrat'),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,3 @@
-//pages/signup_screen.dart
-
 import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -72,42 +70,64 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFEF7FF), // Background color #fef7ff
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 50),
-                const Text('Create New Account',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 20),
-                CustomTextField(label: 'Username', controller: _usernameController),
-                const SizedBox(height: 20),
-                CustomTextField(label: 'Phone', controller: _phoneController),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  label: 'Password',
-                  obscureText: true,
-                  controller: _passwordController,
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(label: 'Name', controller: _nameController),
-                const SizedBox(height: 20),
-                CustomTextField(label: 'Surname', controller: _surnameController),
-                const SizedBox(height: 20),
-                CustomButton(
-                  text: 'Sign Up',
-                  onPressed: _isLoading ? null : _signup,
-                  color: Colors.red,
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen())),
-                  child: const Text('Already have an account? Login'),
-                ),
-              ],
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/full.png',
+                    width: 200,
+                    height: 200,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Username',
+                    controller: _usernameController,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Phone',
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Password',
+                    obscureText: true,
+                    controller: _passwordController,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Name',
+                    controller: _nameController,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Surname',
+                    controller: _surnameController,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomButton(
+                    text: 'Sign Up',
+                    onPressed: _isLoading ? null : _signup,
+                    color: Color(0xFF201731), // Button background #201731
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen())),
+                    child: Text(
+                      'Already have an account? Login',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

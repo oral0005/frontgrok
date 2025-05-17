@@ -1,5 +1,3 @@
-//pages/login_screen.dart
-
 import 'package:flutter/material.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -57,38 +55,48 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFEF7FF), // Background color #fef7ff
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.local_shipping, size: 100, color: Colors.teal),
-                const SizedBox(height: 20),
-                CustomTextField(label: 'Username', controller: _usernameController),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  label: 'Password',
-                  obscureText: true,
-                  controller: _passwordController,
-                ),
-                const SizedBox(height: 20),
-                CustomButton(
-                  text: 'Login',
-                  onPressed: _isLoading ? null : _login,
-                  color: Colors.red,
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('Forgot password?'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignupScreen())),
-                  child: const Text('Sign Up'),
-                ),
-              ],
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/full.png',
+                    width: 200,
+                    height: 200,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Username',
+                    controller: _usernameController,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: 'Password',
+                    obscureText: true,
+                    controller: _passwordController,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomButton(
+                    text: 'Login',
+                    onPressed: _isLoading ? null : _login,
+                    color: Color(0xFF201731), // Button background #201731
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignupScreen())),
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(color: Colors.grey), // Default text color
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

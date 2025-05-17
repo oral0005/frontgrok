@@ -1,5 +1,3 @@
-//pages/start_screen.dart
-
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 
@@ -27,13 +25,16 @@ class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFEF7FF), // Set background color to #fef7ff
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.local_shipping, size: 100, color: Colors.teal),
-            SizedBox(height: 20),
-            Text('polyly.kz', style: TextStyle(fontSize: 18, color: Colors.grey)),
+          children: [
+            Image.asset(
+              'assets/images/full.png', // Logo path
+              width: 300, // Adjust size as needed
+              height: 300,
+            ),
           ],
         ),
       ),

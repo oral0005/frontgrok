@@ -42,9 +42,17 @@ class _TabBarWidgetState extends State<TabBarWidget> with SingleTickerProviderSt
       children: [
         TabBar(
           controller: _tabController,
-          labelColor: Colors.red,
+          labelColor: Color(0xFF201731),
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.red,
+          indicatorColor: Color(0xFF201731),
+          labelStyle: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600, // SemiBold for tab labels
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w600, // SemiBold for unselected tabs
+          ),
           tabs: [
             Tab(text: widget.firstTab),
             Tab(text: widget.secondTab),
