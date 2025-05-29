@@ -5,6 +5,7 @@ import '../widgets/custom_button.dart';
 import '../services/api_service.dart';
 import '../widgets/appinio_animated_toggle_tab.dart';
 import 'my_posts_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreateFormScreen extends StatefulWidget {
   final VoidCallback? onPostCreated;
@@ -238,8 +239,8 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
       child: Scaffold(
         backgroundColor: Color(0xFFFEF7FF),
         appBar: AppBar(
-          title: const Text(
-            'Create Post',
+          title: Text(
+            'create_post'.tr(),
             style: TextStyle(fontFamily: 'Montserrat'),
           ),
           centerTitle: true,
@@ -263,8 +264,11 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                           _selectedTabIndex = index;
                         });
                       },
-                      tabTexts: const ['Courier Posts', 'Sender Posts'],
-                      height: 40,
+                      tabTexts: [
+                        'courier_posts'.tr(),
+                        'sender_posts'.tr(),
+                      ],
+                      height: 52,
                       width: MediaQuery.of(context).size.width - 32,
                       boxDecoration: BoxDecoration(
                         color: Colors.white,
@@ -300,7 +304,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     const SizedBox(height: 20),
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
-                        labelText: 'From',
+                        labelText: 'from'.tr(),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -324,10 +328,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                       items: _kazakhstanCities
                           .map((city) => DropdownMenuItem(
                         value: city,
-                        child: Text(
-                          city,
-                          style: const TextStyle(fontFamily: 'Montserrat'),
-                        ),
+                        child: Text(city.tr()),
                       ))
                           .toList(),
                       onChanged: (value) {
@@ -345,7 +346,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
-                        labelText: 'To',
+                        labelText: 'to'.tr(),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -369,10 +370,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                       items: _kazakhstanCities
                           .map((city) => DropdownMenuItem(
                         value: city,
-                        child: Text(
-                          city,
-                          style: const TextStyle(fontFamily: 'Montserrat'),
-                        ),
+                        child: Text(city.tr()),
                       ))
                           .toList(),
                       onChanged: (value) {
@@ -401,7 +399,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          'Recommended Price: ${_recommendedPrice!.toStringAsFixed(0)} KZT',
+                          '${_recommendedPrice!.toStringAsFixed(0)} KZT',
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.green,
@@ -414,7 +412,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          'No price recommendation available ($_selectedFrom to $_selectedTo)',
+                          'no_price_recommendation'.tr(args: [_selectedFrom ?? '', _selectedTo ?? '']),
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.grey,
@@ -436,7 +434,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Send Date',
+                              'send_date'.tr(),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -459,18 +457,18 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
-                      label: 'Description',
+                      label: 'description'.tr(),
                       controller: _descriptionController,
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
-                      label: _selectedTabIndex == 0 ? 'Delivery Price' : 'Parcel Price',
+                      label: _selectedTabIndex == 0 ? 'delivery_price'.tr() : 'parcel_price'.tr(),
                       controller: _priceController,
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 20),
                     CustomButton(
-                      text: 'Save',
+                      text: 'save'.tr(),
                       onPressed: _isLoading ? null : _createPost,
                       color: Color(0xFF201731),
                     ),

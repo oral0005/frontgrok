@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class TabBarWidget extends StatefulWidget {
   final String firstTab;
@@ -54,8 +55,20 @@ class _TabBarWidgetState extends State<TabBarWidget> with SingleTickerProviderSt
             fontWeight: FontWeight.w600,
           ),
           tabs: [
-            Tab(text: widget.firstTab),
-            Tab(text: widget.secondTab),
+            Tab(child: AutoSizeText(
+              widget.firstTab,
+              maxLines: 2,
+              minFontSize: 10,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            )),
+            Tab(child: AutoSizeText(
+              widget.secondTab,
+              maxLines: 2,
+              minFontSize: 10,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            )),
           ],
         ),
       ],

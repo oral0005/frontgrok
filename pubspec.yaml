@@ -36,6 +36,12 @@ dependencies:
   shared_preferences: ^2.2.3  # For storing token
   intl: ^0.19.0  # For date formatting
   dropdown_search: ^5.0.6
+  image_picker: ^1.0.4
+  path_provider: ^2.0.11
+  easy_localization: ^3.0.1
+  auto_size_text: ^3.0.0
+  url_launcher: ^6.2.5
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +68,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/images/full.png
+     - assets/default_avatar.png
+     - assets/translations/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

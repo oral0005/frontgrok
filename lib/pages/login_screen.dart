@@ -4,6 +4,7 @@ import '../widgets/custom_button.dart';
 import '../services/api_service.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,7 +28,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await _apiService.login(_usernameController.text, _passwordController.text);
+      final user = await _apiService.getUserProfile();
       if (mounted) {
+        if (user.language != null) {
+          await context.setLocale(Locale(user.language!));
+        }
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
       }
     } catch (e) {

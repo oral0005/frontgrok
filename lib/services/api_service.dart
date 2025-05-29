@@ -1,13 +1,15 @@
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/courier_post.dart';
 import '../models/sender_post.dart';
 import '../models/user.dart';
+import 'dart:io';
+
+const String serverBaseUrl = 'ttp://192.168.56.1:5000/api';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.30:5000/api';
+  static const String baseUrl = 'http://192.168.56.1:5000/api';
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -93,6 +95,64 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Profile fetch error: $e');
+    }
+  }
+
+  Future<String> uploadAvatar(File imageFile) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/users/upload-avatar'),
+    );
+    request.headers['x-auth-token'] = token;
+    request.files.add(await http.MultipartFile.fromPath('avatar', imageFile.path));
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('uploadAvatar responseData: $responseData');
+      return responseData['avatarUrl'];
+    } else {
+      throw Exception('Failed to upload avatar: ${response.statusCode}');
+    }
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    required String surname,
+    String? avatarUrl,
+    String? language,
+  }) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    print('updateProfile body: \\${json.encode({
+      'name': name,
+      'surname': surname,
+      if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      if (language != null) 'language': language,
+    })}');
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/users/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: json.encode({
+        'name': name,
+        'surname': surname,
+        if (avatarUrl != null) 'avatarUrl': avatarUrl,
+        if (language != null) 'language': language,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update profile: \\${response.statusCode}');
     }
   }
 
@@ -391,4 +451,89 @@ class ApiService {
       throw Exception('Delete courier post error: $e');
     }
   }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/users/change-password'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: jsonEncode({
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to change password: ${response.statusCode}');
+    }
+  }
+
+  Future<void> sendVerificationCode(String phoneNumber) async {
+    try {
+      print('Sending verification code to: $phoneNumber');
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/send-verification'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phoneNumber': phoneNumber}),
+      );
+
+      print('Send verification code response status: ${response.statusCode}');
+      print('Send verification code response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        Map<String, dynamic> errorBody = {};
+        try {
+          errorBody = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response body: $e');
+        }
+        throw Exception(errorBody['message']?.toString() ?? 'Failed to send verification code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error sending verification code: $e');
+      throw Exception('Failed to send verification code: $e');
+    }
+  }
+
+  Future<void> verifyCode(String phoneNumber, String code) async {
+    try {
+      print('Verifying code for: $phoneNumber');
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/verify-code'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phoneNumber': phoneNumber,
+          'code': code,
+        }),
+      );
+
+      print('Verify code response status: ${response.statusCode}');
+      print('Verify code response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        Map<String, dynamic> errorBody = {};
+        try {
+          errorBody = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response body: $e');
+        }
+        throw Exception(errorBody['message']?.toString() ?? 'Failed to verify code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error verifying code: $e');
+      throw Exception('Failed to verify code: $e');
+    }
+  }
 }
+//сomment

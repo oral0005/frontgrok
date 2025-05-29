@@ -2,43 +2,62 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
   final String label;
-  final TextEditingController? controller;
-  final TextInputType? keyboardType;
-  final Color? color;
+  final TextEditingController controller;
   final bool obscureText;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
 
   const CustomTextField({
+    Key? key,
     required this.label,
-    this.controller,
-    this.keyboardType,
-    this.color,
+    required this.controller,
     this.obscureText = false,
-    super.key,
-  });
+    this.keyboardType,
+    this.validator,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: controller,
-      keyboardType: keyboardType,
       obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: validator,
+      style: const TextStyle(
+        fontFamily: 'Montserrat',
+        fontSize: 16,
+      ),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: const TextStyle(
+          color: Colors.grey,
+          fontFamily: 'Montserrat',
+        ),
+        filled: true,
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        filled: true,
-        fillColor: color ?? Colors.white,
-        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        labelStyle: const TextStyle(
-          fontFamily: 'Montserrat',
-          fontWeight: FontWeight.w600,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-      ),
-      style: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w400,
-        color: color != null ? Colors.white : Colors.black,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF201731)),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        errorStyle: const TextStyle(
+          color: Colors.red,
+          fontFamily: 'Montserrat',
+        ),
       ),
     );
   }

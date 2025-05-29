@@ -9,6 +9,7 @@ class Post {
   final double price;
   final String description;
   final String? phoneNumber;
+  final String? avatarUrl;
 
   Post({
     required this.type,
@@ -21,5 +22,6 @@ class Post {
     required this.price,
     required this.description,
     this.phoneNumber,
+    this.avatarUrl,
   });
 }

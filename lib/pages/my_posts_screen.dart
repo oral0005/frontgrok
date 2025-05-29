@@ -8,6 +8,7 @@ import '../models/post.dart';
 import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
 import '../widgets/custom_text_field.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({super.key});
@@ -85,7 +86,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         from: post.from,
         to: post.to,
         date: post.sendTime,
-        userLocation: '${post.user.name}, ${post.user.surname}',
+        userLocation: '${post.user.name} ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
         price: post.parcelPrice,
@@ -98,7 +99,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         from: post.from,
         to: post.to,
         date: post.sendTime,
-        userLocation: '${post.user.name}, ${post.user.surname}',
+        userLocation: '${post.user.name} ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
         price: post.pricePerParcel,
@@ -144,7 +145,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error deleting post: $e',
+              'error_deleting_post',
               style: const TextStyle(fontFamily: 'Montserrat'),
             ),
           ),
@@ -177,9 +178,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFFEF7FF),
         appBar: AppBar(
-          title: const Text(
-            'My Posts',
-            style: TextStyle(fontFamily: 'Montserrat'),
+          title: Text(
+            'my_posts'.tr(),
+            style: const TextStyle(fontFamily: 'Montserrat'),
           ),
           centerTitle: true,
           backgroundColor: const Color(0xFFFEF7FF),
@@ -189,8 +190,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         body: Column(
           children: [
             TabBarWidget(
-              firstTab: 'Courier Posts',
-              secondTab: 'Sender Posts',
+              firstTab: 'courier_posts'.tr(),
+              secondTab: 'sender_posts'.tr(),
               onTabChanged: (index) => setState(() => _selectedTabIndex = index),
             ),
             Expanded(
@@ -222,7 +223,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Retry',
                                 style: TextStyle(fontFamily: 'Montserrat'),
                               ),
@@ -233,10 +234,10 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     }
                     final posts = snapshot.data ?? [];
                     if (posts.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'You have no posts yet',
-                          style: TextStyle(fontFamily: 'Montserrat'),
+                          'you_have_no_posts_yet'.tr(),
+                          style: const TextStyle(fontFamily: 'Montserrat'),
                         ),
                       );
                     }
@@ -290,8 +291,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                       itemBuilder: (context, index) {
                         final post = filteredPosts[index];
                         return PostCard(
-                          from: post.from,
-                          to: post.to,
+                          from: post.from.tr(),
+                          to: post.to.tr(),
                           date: post.date,
                           userLocation: post.userLocation,
                           price: post.price,

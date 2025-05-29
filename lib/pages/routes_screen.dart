@@ -8,6 +8,7 @@ import '../models/post.dart';
 import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
 import '../widgets/custom_text_field.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RoutesScreen extends StatefulWidget {
   const RoutesScreen({super.key});
@@ -93,12 +94,13 @@ class _RoutesScreenState extends State<RoutesScreen> {
         from: post.from,
         to: post.to,
         date: post.sendTime,
-        userLocation: '${post.user.name}, ${post.user.surname}',
+        userLocation: '${post.user.name} ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
         price: post.parcelPrice,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
+        avatarUrl: post.user.avatarUrl,
       )));
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
@@ -106,12 +108,13 @@ class _RoutesScreenState extends State<RoutesScreen> {
         from: post.from,
         to: post.to,
         date: post.sendTime,
-        userLocation: '${post.user.name}, ${post.user.surname}',
+        userLocation: '${post.user.name} ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
         price: post.pricePerParcel,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
+        avatarUrl: post.user.avatarUrl,
       )));
 
       print('Fetched ${senderPosts.length} sender posts and ${courierPosts.length} courier posts');
@@ -148,9 +151,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        title: const Text(
-          'Search Routes',
-          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Montserrat'),
+        title: Text(
+          'search_routes'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Montserrat'),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -158,7 +161,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
             children: [
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  labelText: 'From',
+                  labelText: 'from'.tr(),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -181,8 +184,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 items: _kazakhstanCities
                     .map((city) => DropdownMenuItem(
                   value: city,
-                  child: Text(city,
-                      style: const TextStyle(fontFamily: 'Montserrat')),
+                  child: Text(city.tr()),
                 ))
                     .toList(),
                 onChanged: (value) => tempFrom = value,
@@ -195,7 +197,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  labelText: 'To',
+                  labelText: 'to'.tr(),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -218,8 +220,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 items: _kazakhstanCities
                     .map((city) => DropdownMenuItem(
                   value: city,
-                  child: Text(city,
-                      style: const TextStyle(fontFamily: 'Montserrat')),
+                  child: Text(city.tr()),
                 ))
                     .toList(),
                 onChanged: (value) => tempTo = value,
@@ -247,21 +248,21 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 },
                 child: Text(
                   tempDate == null
-                      ? 'Select Date'
-                      : 'Date: ${tempDate.toString().substring(0, 10)}',
+                      ? 'select_date'.tr()
+                      : 'date'.tr() + ': \\${tempDate.toString().substring(0, 10)}',
                   style: const TextStyle(
                       fontFamily: 'Montserrat', color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 16),
               CustomTextField(
-                label: 'Min Price',
+                label: 'min_price'.tr(),
                 controller: _minPriceController,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               CustomTextField(
-                label: 'Max Price',
+                label: 'max_price'.tr(),
                 controller: _maxPriceController,
                 keyboardType: TextInputType.number,
               ),
@@ -273,9 +274,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
+            child: Text(
+              'cancel'.tr(),
+              style: const TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
             ),
           ),
           ElevatedButton(
@@ -303,9 +304,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: const Text(
-              'Search',
-              style: TextStyle(fontFamily: 'Montserrat'),
+            child: Text(
+              'search'.tr(),
+              style: const TextStyle(fontFamily: 'Montserrat'),
             ),
           ),
         ],
@@ -337,7 +338,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFFEF7FF),
         appBar: AppBar(
-          title: const Text('Routes',
+          title: Text('routes'.tr(),
               style: TextStyle(fontFamily: 'Montserrat')),
           centerTitle: true,
           automaticallyImplyLeading: false,
@@ -361,24 +362,24 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'date_desc',
-                  child: Text('Sort by Date (Newest First)',
+                  child: Text('sort_by_date_newest'.tr(),
                       style: TextStyle(fontFamily: 'Montserrat')),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'date_asc',
-                  child: Text('Sort by Date (Oldest First)',
+                  child: Text('sort_by_date_oldest'.tr(),
                       style: TextStyle(fontFamily: 'Montserrat')),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'price_asc',
-                  child: Text('Sort by Price (Low to High)',
+                  child: Text('sort_by_price_low'.tr(),
                       style: TextStyle(fontFamily: 'Montserrat')),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'price_desc',
-                  child: Text('Sort by Price (High to Low)',
+                  child: Text('sort_by_price_high'.tr(),
                       style: TextStyle(fontFamily: 'Montserrat')),
                 ),
               ],
@@ -388,8 +389,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
         body: Column(
           children: [
             TabBarWidget(
-              firstTab: 'Courier Posts',
-              secondTab: 'Sender Posts',
+              firstTab: 'courier_posts'.tr(),
+              secondTab: 'sender_posts'.tr(),
               onTabChanged: (index) {
                 if (mounted) {
                   setState(() => _selectedTabIndex = index);
@@ -473,8 +474,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       return Center(
                         child: Text(
                           _selectedTabIndex == 0
-                              ? 'No courier posts available'
-                              : 'No sender posts available',
+                              ? 'no_courier_posts_available'.tr()
+                              : 'no_sender_posts_available'.tr(),
                           style: const TextStyle(fontFamily: 'Montserrat'),
                         ),
                       );

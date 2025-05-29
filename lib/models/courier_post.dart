@@ -1,4 +1,6 @@
 import 'package:frontgrok/models/user.dart';
+import 'package:intl/intl.dart';
+
 class CourierPost {
   final String id;
   final String from;
@@ -33,5 +35,5 @@ class CourierPost {
     );
   }
 
-
+  String get formattedDate => DateFormat('dd.MM.yyyy').format(dateCreated);
 }
