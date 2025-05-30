@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/courier_post.dart';
@@ -6,10 +7,11 @@ import '../models/sender_post.dart';
 import '../models/user.dart';
 import 'dart:io';
 
-const String serverBaseUrl = 'ttp://192.168.56.1:5000/api';
+String? serverBaseUrl = dotenv.env['SERVER_URL'] ;
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.56.1:5000/api';
+  // Use SERVER_URL from .env file with a fallback
+  static String baseUrl = dotenv.env['SERVER_URL'] ?? 'http://192.168.56.1:5000/api';
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
