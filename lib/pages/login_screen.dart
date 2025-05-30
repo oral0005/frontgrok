@@ -18,10 +18,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
+  bool _obscurePassword = true; // Added to toggle password visibility
 
   Future<void> _login() async {
     if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showSnackBar('Please fill in all fields');
+      _showSnackBar('please_fill_in_all_fields'.tr());
       return;
     }
 
@@ -60,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFEF7FF), // Background color #fef7ff
+      backgroundColor: const Color(0xFFFEF7FF), // Background color #fef7ff
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -77,27 +78,38 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: 'Username',
+                    label: 'username'.tr(),
                     controller: _usernameController,
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    label: 'Password',
-                    obscureText: true,
+                    label: 'password'.tr(),
+                    obscureText: _obscurePassword,
                     controller: _passwordController,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                   ),
                   const SizedBox(height: 20),
                   CustomButton(
-                    text: 'Login',
+                    text: 'login'.tr(),
                     onPressed: _isLoading ? null : _login,
-                    color: Color(0xFF201731),
+                    color: const Color(0xFF201731),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignupScreen())),
                     child: Text(
-                      'Sign Up',
-                      style: TextStyle(color: Colors.grey),
+                      'sign_up'.tr(),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 ],
