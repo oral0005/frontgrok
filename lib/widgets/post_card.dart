@@ -78,7 +78,7 @@ class PostCard extends StatelessWidget {
                   Text('${'date'.tr()}: $formattedDate',
                       style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14)),
                   const Spacer(),
-                  const Icon(Icons.attach_money, size: 18, color: Colors.green),
+
                   const SizedBox(width: 4),
                   Text('${'price'.tr()}: ${price.toStringAsFixed(2)} KZT',
                       style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14, color: Colors.green)),

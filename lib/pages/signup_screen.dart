@@ -112,143 +112,143 @@ class _SignupScreenState extends State<SignupScreen> {
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
               child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/full.png',
-                    width: 200,
-                    height: 200,
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'username'.tr(),
-                    controller: _usernameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter username';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'phone'.tr(),
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter phone number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'password'.tr(),
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/full.png',
+                      width: 200,
+                      height: 200,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'username'.tr(),
+                      controller: _usernameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter username';
+                        }
+                        return null;
                       },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter password';
-                      }
-                      if (value.length < 8) {
-                        return 'Password must be at least 8 characters';
-                      }
-                      if (!RegExp(r'^[A-Z]').hasMatch(value)) {
-                        return 'Password must start with an uppercase letter';
-                      }
-                      if (!RegExp(r'\d').hasMatch(value)) {
-                        return 'Password must contain at least one number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'confirm_password'.tr(),
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'phone'.tr(),
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter phone number';
+                        }
+                        return null;
                       },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'name'.tr(),
-                    controller: _nameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'surname'.tr(),
-                    controller: _surnameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter surname';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomButton(
-                    text: 'sign_up'.tr(),
-                    onPressed: _isLoading ? null : _register,
-                    color: const Color(0xFF201731),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'password'.tr(),
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter password';
+                        }
+                        if (value.length < 8) {
+                          return 'Password must be at least 8 characters';
+                        }
+                        if (!RegExp(r'^[A-Z]').hasMatch(value)) {
+                          return 'Password must start with an uppercase letter';
+                        }
+                        if (!RegExp(r'\d').hasMatch(value)) {
+                          return 'Password must contain at least one number';
+                        }
+                        return null;
+                      },
                     ),
-                    child: Text(
-                      'already_have_account_login'.tr(),
-                      style: const TextStyle(color: Colors.grey),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'confirm_password'.tr(),
+                      controller: _confirmPasswordController,
+                      obscureText: _obscureConfirmPassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm password';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'name'.tr(),
+                      controller: _nameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'surname'.tr(),
+                      controller: _surnameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter surname';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    CustomButton(
+                      text: 'sign_up'.tr(),
+                      onPressed: _isLoading ? null : _register,
+                      color: const Color(0xFF201731),
+                    ),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      ),
+                      child: Text(
+                        'already_have_account_login'.tr(),
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }
