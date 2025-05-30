@@ -67,6 +67,223 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to pick image'.tr())));
+      }
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    setState(() { _isLoading = true; });
+    try {
+      String? avatarUrl = _avatarUrl;
+      if (_imageFile != null) {
+        avatarUrl = await _apiService.uploadAvatar(_imageFile!);
+      }
+      await _apiService.updateProfile(
+        name: _nameController.text,
+        surname: _surnameController.text,
+        avatarUrl: avatarUrl,
+        language: _selectedLanguageCode,
+      );
+      if (mounted) {
+        Navigator.pop(context);
+        _refreshProfile();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('settings_saved')));
+      }
+    } catch (e, stack) {
+      print('Error saving settings: $e');
+      print('Stack trace: $stack');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('error_saving_settings')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        File? localImageFile = _imageFile;
+        String? localName = _nameController.text;
+        String? localSurname = _surnameController.text;
+        String localLanguage = languages.firstWhere(
+          (lang) => lang['code'] == _selectedLanguageCode,
+          orElse: () => languages[0],
+        )['label']!;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFFFEF7FF),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Text('settings'.tr(), style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Montserrat')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+                        if (pickedFile != null) {
+                          setStateDialog(() {
+                            localImageFile = File(pickedFile.path);
+                          });
+                        }
+                      },
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                              border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                            ),
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundColor: Colors.grey[200],
+                              backgroundImage: localImageFile != null
+                                  ? FileImage(localImageFile!)
+                                  : (_avatarUrl != null && _avatarUrl!.isNotEmpty
+                                      ? NetworkImage(getAvatarUrl(_avatarUrl))
+                                      : const AssetImage('assets/default_avatar.png')) as ImageProvider,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'name'.tr(),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                      style: const TextStyle(fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _surnameController,
+                      decoration: InputDecoration(
+                        labelText: 'surname'.tr(),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.badge),
+                      ),
+                      style: const TextStyle(fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedLanguageCode,
+                          isExpanded: true,
+                          items: languages.map((lang) {
+                            return DropdownMenuItem<String>(
+                              value: lang['code'],
+                              child: Text(lang['label']!, style: const TextStyle(fontFamily: 'Montserrat')),
+                            );
+                          }).toList(),
+                          onChanged: _onLanguageChanged,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('cancel'.tr(), style: TextStyle(fontFamily: 'Montserrat', color: Colors.grey)),
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.logout, color: Colors.red),
+                  label: Text('logout'.tr(), style: TextStyle(color: Colors.red, fontFamily: 'Montserrat')),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove('token');
+                          await prefs.remove('userId');
+                          if (mounted) {
+                            Navigator.pop(context);
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          }
+                        },
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _showChangePasswordDialog();
+                  },
+                  child: Text('change_password'.tr(), style: TextStyle(color: Theme.of(context).primaryColor)),
+                ),
+                ElevatedButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          setState(() {
+                            _imageFile = localImageFile;
+                          });
+                          _saveSettings();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF201731),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
+                      : Text('save'.tr(), style: TextStyle(fontFamily: 'Montserrat', color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
