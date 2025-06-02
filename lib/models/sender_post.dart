@@ -7,10 +7,6 @@ class SenderPost {
   final double parcelPrice;
   final String description;
   final User user;
-  final String status;
-  final String? courierId;
-  final bool? senderRatedCourier;
-  final bool? courierRatedSender;
 
   SenderPost({
     required this.id,
@@ -20,10 +16,6 @@ class SenderPost {
     required this.parcelPrice,
     required this.description,
     required this.user,
-    required this.status,
-    this.courierId,
-    this.senderRatedCourier,
-    this.courierRatedSender,
   });
 
   factory SenderPost.fromJson(Map<String, dynamic> json) {
@@ -34,11 +26,7 @@ class SenderPost {
       sendTime: DateTime.tryParse(json['sendTime']?.toString() ?? '') ?? DateTime.now(),
       parcelPrice: (json['parcelPrice'] as num?)?.toDouble() ?? 0.0,
       description: json['description']?.toString() ?? '',
-      user: User.fromJson(json['userId'] is Map<String, dynamic> ? json['userId'] : (json['userId'] is String ? {'_id': json['userId']} : {})),
-      status: json['status']?.toString() ?? 'pending',
-      courierId: json['courierId']?.toString(),
-      senderRatedCourier: json['senderRatedCourier'] as bool?,
-      courierRatedSender: json['courierRatedSender'] as bool?,
+      user: User.fromJson(json['userId'] is Map<String, dynamic> ? json['userId'] : {}),
     );
   }
 }

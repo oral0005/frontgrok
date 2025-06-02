@@ -462,7 +462,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
-                      label: _selectedTabIndex == 0 ? 'delivery_price'.tr() : 'parcel_price'.tr(),
+                      label: 'parcel_price'.tr(),
                       controller: _priceController,
                       keyboardType: TextInputType.number,
                     ),

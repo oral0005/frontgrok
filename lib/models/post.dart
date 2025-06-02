@@ -10,11 +10,6 @@ class Post {
   final String description;
   final String? phoneNumber;
   final String? avatarUrl;
-  final String? status;
-  final String? id;
-  final String? courierId;
-  final bool? senderRatedCourier;
-  final bool? courierRatedSender;
 
   Post({
     required this.type,
@@ -28,10 +23,5 @@ class Post {
     required this.description,
     this.phoneNumber,
     this.avatarUrl,
-    this.status,
-    this.id,
-    this.courierId,
-    this.senderRatedCourier,
-    this.courierRatedSender,
   });
 }

@@ -6,22 +6,20 @@ class CourierPost {
   final String from;
   final String to;
   final DateTime sendTime;
-  final double pricePerParcel;
+  final double parcelPrice;
   final String description;
   final User user;
   final DateTime dateCreated;
-  final String status;
 
   CourierPost({
     required this.id,
     required this.from,
     required this.to,
     required this.sendTime,
-    required this.pricePerParcel,
+    required this.parcelPrice,
     required this.description,
     required this.user,
     required this.dateCreated,
-    required this.status,
   });
 
   factory CourierPost.fromJson(Map<String, dynamic> json) {
@@ -30,11 +28,10 @@ class CourierPost {
       from: json['from']?.toString() ?? '',
       to: json['to']?.toString() ?? '',
       sendTime: DateTime.tryParse(json['sendTime']?.toString() ?? '') ?? DateTime.now(),
-      pricePerParcel: (json['pricePerParcel'] as num?)?.toDouble() ?? 0.0,
+      parcelPrice: (json['parcelPrice'] as num?)?.toDouble() ?? 0.0,
       description: json['description']?.toString() ?? '',
       user: User.fromJson(json['userId'] is Map<String, dynamic> ? json['userId'] : {}),
       dateCreated: DateTime.tryParse(json['dateCreated']?.toString() ?? '') ?? DateTime.now(),
-      status: json['status']?.toString() ?? 'pending',
     );
   }
 

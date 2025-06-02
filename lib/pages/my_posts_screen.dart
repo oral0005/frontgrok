@@ -30,14 +30,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   String _sortBy = 'date';
   bool _sortAscending = false;
 
-  final List<String> _kazakhstanCities = [
-    'Almaty', 'Astana', 'Shymkent', 'Karaganda', 'Aktobe', 'Taraz', 'Pavlodar',
-    'Ust-Kamenogorsk', 'Semey', 'Atyrau', 'Kostanay', 'Kyzylorda', 'Uralsk',
-    'Petropavl', 'Aktau', 'Temirtau', 'Turkestan', 'Taldykorgan', 'Ekibastuz',
-    'Rudny', 'Zhanaozen', 'Zhezkazgan', 'Kentau', 'Balkhash', 'Satbayev',
-    'Kokshetau', 'Saran', 'Shakhtinsk', 'Ridder', 'Arkalyk', 'Lisakovsk', 'Aral',
-    'Zhetisay', 'Saryagash', 'Aksu', 'Stepnogorsk', 'Kapchagay',
-  ];
+
 
   @override
   void initState() {
@@ -102,7 +95,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         userLocation: '${post.user.name} ${post.user.surname}',
         userId: post.user.id,
         postId: post.id,
-        price: post.pricePerParcel,
+        price: post.parcelPrice,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
       )));

@@ -32,7 +32,6 @@ class BottomNavigation extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.map), label: 'routes'.tr()),
         BottomNavigationBarItem(icon: Icon(Icons.add), label: 'create'.tr()),
         BottomNavigationBarItem(icon: Icon(Icons.list), label: 'my_posts'.tr()),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'history'.tr()),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'profile'.tr()),
       ],
       type: BottomNavigationBarType.fixed,

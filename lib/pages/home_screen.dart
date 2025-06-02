@@ -3,7 +3,6 @@ import 'routes_screen.dart';
 import 'create_form_screen.dart';
 import 'my_posts_screen.dart';
 import 'profile_screen.dart';
-import 'history_screen.dart';
 import '../widgets/bottom_navigation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
     const RoutesScreen(),
     const CreateFormScreen(),
     const MyPostsScreen(),
-    const HistoryScreen(),
     const ProfileScreen(),
   ];
 
