@@ -7,7 +7,7 @@ import '../models/sender_post.dart';
 import '../models/user.dart';
 import 'dart:io';
 
-String? serverBaseUrl = dotenv.env['SERVER_AVA'] ;
+String? serverBaseUrl = dotenv.env['SERVER_AVATAR'] ;
 
 class ApiService {
   // Use SERVER_URL from .env file with a fallback
