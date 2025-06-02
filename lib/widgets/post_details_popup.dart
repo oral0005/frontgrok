@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 String getAvatarUrl(String? avatarUrl) {
   if (avatarUrl == null || avatarUrl.isEmpty) return '';
@@ -12,7 +13,18 @@ String getAvatarUrl(String? avatarUrl) {
 }
 
 class PostDetailsPopup {
-  static void show(BuildContext context, Post post) {
+  static void show(BuildContext context, Post post) async {
+    final ApiService apiService = ApiService();
+    final prefs = await SharedPreferences.getInstance();
+    final currentUserId = prefs.getString('userId');
+
+    final bool isOwner = post.userId == currentUserId;
+    final bool isSenderPost = post.type == 'sender';
+    final bool isCourierPost = post.type == 'courier';
+
+    bool showActivateButton = isSenderPost && isOwner && post.status == 'pending';
+    bool showAcceptButton = isSenderPost && !isOwner && post.status == 'pending_acceptance';
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -69,11 +81,11 @@ class PostDetailsPopup {
                         radius: 24,
                         backgroundColor: Colors.grey[300],
                         backgroundImage: (post.avatarUrl != null && post.avatarUrl!.isNotEmpty)
-                          ? NetworkImage(getAvatarUrl(post.avatarUrl))
-                          : null,
+                            ? NetworkImage(getAvatarUrl(post.avatarUrl))
+                            : null,
                         child: (post.avatarUrl == null || post.avatarUrl!.isEmpty)
-                          ? Icon(Icons.person, size: 28, color: Colors.blueGrey[700])
-                          : null,
+                            ? Icon(Icons.person, size: 28, color: Colors.blueGrey[700])
+                            : null,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -149,6 +161,52 @@ class PostDetailsPopup {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () => _callPhone(context, post.phoneNumber!),
+              ),
+            if (showActivateButton)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                label: Text('activate_post'.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () async {
+                  try {
+                    await apiService.activateSenderPost(post.postId);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('post_activated_successfully'.tr()))
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${'error_activating_post'.tr()}: $e'))
+                    );
+                  }
+                },
+              ),
+            if (showAcceptButton)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.thumb_up_alt_outlined, color: Colors.white),
+                label: Text('accept_delivery'.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () async {
+                  try {
+                    await apiService.acceptSenderPostByCourier(post.postId);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('post_accepted_successfully'.tr()))
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${'error_accepting_post'.tr()}: $e'))
+                    );
+                  }
+                },
               ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

@@ -6,6 +6,7 @@ import '../models/courier_post.dart';
 import '../models/sender_post.dart';
 import '../models/user.dart';
 import 'dart:io';
+import '../models/notification.dart';
 
 String? serverBaseUrl = dotenv.env['SERVER_AVATAR'] ;
 
@@ -246,7 +247,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         if (response.body.isEmpty) {
-          throw Exception('Empty response body');
+          return [];
         }
         final decoded = jsonDecode(response.body);
         if (decoded is! List) {
@@ -293,7 +294,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         if (response.body.isEmpty) {
-          throw Exception('Empty response body');
+          return [];
         }
         final decoded = jsonDecode(response.body);
         if (decoded is! List) {
@@ -341,7 +342,7 @@ class ApiService {
       print('Create courier post response status: ${response.statusCode}');
       print('Create courier post response body: ${response.body}');
 
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
         throw Exception(errorBody['msg']?.toString() ?? 'Failed to create courier post: ${response.statusCode}');
       }
@@ -373,7 +374,7 @@ class ApiService {
       print('Create sender post response status: ${response.statusCode}');
       print('Create sender post response body: ${response.body}');
 
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
         throw Exception(errorBody['msg']?.toString() ?? 'Failed to create sender post: ${response.statusCode}');
       }
@@ -535,6 +536,209 @@ class ApiService {
     } catch (e) {
       print('Error verifying code: $e');
       throw Exception('Failed to verify code: $e');
+    }
+  }
+
+  Future<void> activateCourierPost(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+    final response = await http.post(
+      Uri.parse('$baseUrl/courier-posts/$postId/activate'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+    if (response.statusCode != 200) {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to activate courier post: ${response.statusCode}');
+    }
+  }
+
+  Future<SenderPost> activateSenderPost(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/sender-posts/$postId/activate'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return SenderPost.fromJson(jsonDecode(response.body));
+    } else {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to activate sender post: ${response.statusCode}');
+    }
+  }
+
+  Future<SenderPost> acceptSenderPostByCourier(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/sender-posts/$postId/acceptByCourier'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return SenderPost.fromJson(jsonDecode(response.body));
+    } else {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to accept sender post: ${response.statusCode}');
+    }
+  }
+
+  Future<SenderPost> markAsDeliveredByCourier(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/sender-posts/$postId/markAsDeliveredByCourier'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return SenderPost.fromJson(jsonDecode(response.body));
+    } else {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to mark delivery as completed: ${response.statusCode}');
+    }
+  }
+
+  Future<SenderPost> confirmCompletionBySender(String postId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/sender-posts/$postId/confirm-completion'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return SenderPost.fromJson(jsonDecode(response.body));
+    } else {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to confirm completion: ${response.statusCode}');
+    }
+  }
+
+  // Method to rate for a SenderPost
+  Future<void> rateSenderPost(String postId, String targetUserId, int rating) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/sender-posts/$postId/rate'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: jsonEncode({
+        'targetUserId': targetUserId,
+        'rating': rating,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to rate for sender post: ${response.statusCode}');
+    }
+  }
+
+  // Method to rate for a CourierPost (if you have a separate rating for them)
+  Future<void> rateCourierPost(String postId, String targetUserId, int rating) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/courier-posts/$postId/rate'), // Assuming this endpoint exists or will be created
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: jsonEncode({
+        'targetUserId': targetUserId,
+        'rating': rating,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to rate for courier post: ${response.statusCode}');
+    }
+  }
+
+  // Notification Methods
+  Future<List<NotificationModel>> fetchNotifications() async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/notifications'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      if (response.body.isEmpty) return [];
+      List<dynamic> body = jsonDecode(response.body);
+      return body.map((dynamic item) => NotificationModel.fromJson(item)).toList();
+    } else {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to fetch notifications: ${response.statusCode}');
+    }
+  }
+
+  Future<NotificationModel> markNotificationAsRead(String notificationId) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/notifications/$notificationId/read'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return NotificationModel.fromJson(jsonDecode(response.body));
+    } else {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to mark notification as read: ${response.statusCode}');
+    }
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No token found');
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/notifications/mark-all-read'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(errorBody['msg']?.toString() ?? 'Failed to mark all notifications as read: ${response.statusCode}');
     }
   }
 }

@@ -9,6 +9,7 @@ import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
 import '../widgets/custom_text_field.dart';
 import 'package:easy_localization/easy_localization.dart';
+import './notifications_screen.dart';
 
 class RoutesScreen extends StatefulWidget {
   const RoutesScreen({super.key});
@@ -101,6 +102,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
         description: post.description,
         phoneNumber: post.user.phoneNumber,
         avatarUrl: post.user.avatarUrl,
+        status: post.status,
+        id: post.id,
+        courierId: post.courierId,
       )));
 
       combinedPosts.addAll(courierPosts.map((post) => Post(
@@ -115,6 +119,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
         description: post.description,
         phoneNumber: post.user.phoneNumber,
         avatarUrl: post.user.avatarUrl,
+        status: post.status,
+        id: post.id,
       )));
 
       print('Fetched ${senderPosts.length} sender posts and ${courierPosts.length} courier posts');
@@ -249,22 +255,30 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 child: Text(
                   tempDate == null
                       ? 'select_date'.tr()
-                      : 'date'.tr() + ': \\${tempDate.toString().substring(0, 10)}',
+                      : '${'date'.tr()}: ${DateFormat('dd.MM.yyyy').format(tempDate!)}',
                   style: const TextStyle(
-                      fontFamily: 'Montserrat', color: Colors.grey),
+                      fontFamily: 'Montserrat', color: Color(0xFF201731)),
                 ),
               ),
               const SizedBox(height: 16),
-              CustomTextField(
-                label: 'min_price'.tr(),
-                controller: _minPriceController,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                label: 'max_price'.tr(),
-                controller: _maxPriceController,
-                keyboardType: TextInputType.number,
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _minPriceController,
+                      label: 'min_price'.tr(),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _maxPriceController,
+                      label: 'max_price'.tr(),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -272,42 +286,33 @@ class _RoutesScreenState extends State<RoutesScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              setState(() {
+                _searchFrom = null;
+                _searchTo = null;
+                _searchDate = null;
+                _minPrice = null;
+                _maxPrice = null;
+                _minPriceController.clear();
+                _maxPriceController.clear();
+                _refreshPosts();
+              });
+              Navigator.of(context).pop();
             },
-            child: Text(
-              'cancel'.tr(),
-              style: const TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
-            ),
+            child: Text('clear'.tr(), style: const TextStyle(color: Colors.redAccent, fontFamily: 'Montserrat')),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _searchFrom = tempFrom;
-                  _searchTo = tempTo;
-                  _searchDate = tempDate;
-                  _minPrice = _minPriceController.text.isNotEmpty
-                      ? double.tryParse(_minPriceController.text)
-                      : null;
-                  _maxPrice = _maxPriceController.text.isNotEmpty
-                      ? double.tryParse(_maxPriceController.text)
-                      : null;
-                });
-              }
-              Navigator.pop(context);
+              setState(() {
+                _searchFrom = tempFrom;
+                _searchTo = tempTo;
+                _searchDate = tempDate;
+                _minPrice = double.tryParse(_minPriceController.text);
+                _maxPrice = double.tryParse(_maxPriceController.text);
+                _refreshPosts();
+              });
+              Navigator.of(context).pop();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF201731),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            child: Text(
-              'search'.tr(),
-              style: const TextStyle(fontFamily: 'Montserrat'),
-            ),
+            child: Text('search'.tr(), style: const TextStyle(color: Color(0xFF201731), fontFamily: 'Montserrat')),
           ),
         ],
       ),
@@ -347,6 +352,16 @@ class _RoutesScreenState extends State<RoutesScreen> {
             onPressed: _showSearchDialog,
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_none, color: Color(0xFF201731)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                );
+              },
+              tooltip: 'notifications'.tr(),
+            ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (mounted) {
@@ -426,12 +441,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
                         ? posts
                         .where((post) =>
                     post.type == 'courier' &&
-                        post.userId != _currentUserId)
+                        post.userId != _currentUserId &&
+                        post.status == 'pending')
                         .toList()
                         : posts
                         .where((post) =>
                     post.type == 'sender' &&
-                        post.userId != _currentUserId)
+                        post.userId != _currentUserId &&
+                        post.status == 'pending')
                         .toList();
 
                     print(
@@ -499,6 +516,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                 : Icons.local_shipping,
                             color: const Color(0xFF201731),
                           ),
+                          status: post.status,
                         );
                       },
                     );

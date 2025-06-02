@@ -11,6 +11,8 @@ class PostCard extends StatelessWidget {
   final VoidCallback onMorePressed;
   final VoidCallback? onDeletePressed;
   final Widget? leading;
+  final String? status;
+  final List<Widget>? actionButtons;
 
   const PostCard({
     super.key,
@@ -22,11 +24,15 @@ class PostCard extends StatelessWidget {
     required this.onMorePressed,
     this.onDeletePressed,
     this.leading,
+    this.status,
+    this.actionButtons,
   });
 
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('dd.MM.yyyy').format(date);
+    final bool hasActions = (actionButtons != null && actionButtons!.isNotEmpty) || onDeletePressed != null;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -41,7 +47,7 @@ class PostCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.location_on, color: Color(0xFF201731)),
+                  leading ?? const Icon(Icons.location_on, color: Color(0xFF201731)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -67,7 +73,6 @@ class PostCard extends StatelessWidget {
                       textAlign: TextAlign.right,
                     ),
                   ),
-                  const Icon(Icons.location_on, color: Color(0xFF201731)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -78,8 +83,6 @@ class PostCard extends StatelessWidget {
                   Text('${'date'.tr()}: $formattedDate',
                       style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14)),
                   const Spacer(),
-
-                  const SizedBox(width: 4),
                   Text('${'price'.tr()}: ${price.toStringAsFixed(2)} KZT',
                       style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14, color: Colors.green)),
                 ],
@@ -87,7 +90,7 @@ class PostCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.person, size: 18, color: Colors.blueGrey),
+                  const Icon(Icons.person_outline, size: 18, color: Colors.blueGrey),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text('${'user'.tr()}: $userLocation',
@@ -95,30 +98,36 @@ class PostCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (onDeletePressed != null) ...[
+              if (status != null && status!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: onDeletePressed,
-                    ),
+                    const Icon(Icons.info_outline, size: 18, color: Colors.orangeAccent),
+                    const SizedBox(width: 6),
+                    Text('${'status'.tr()}: ${status!.tr()}',
+                        style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ],
-              const Divider(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: onMorePressed,
-                  icon: const Icon(Icons.info_outline, color: Color(0xFF201731)),
-                  label: Text('details'.tr(), style: const TextStyle(fontFamily: 'Montserrat', color: Color(0xFF201731))),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF201731),
-                  ),
-                ),
-              ),
+              if (hasActions) ...[
+                 const Divider(height: 20, thickness: 1),
+                 Wrap(
+                   spacing: 8.0,
+                   runSpacing: 4.0,
+                   alignment: WrapAlignment.end,
+                   children: [
+                     if (onDeletePressed != null)
+                        TextButton.icon(
+                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                          label: Text('delete'.tr(), style: const TextStyle(color: Colors.redAccent)),
+                          onPressed: onDeletePressed,
+                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                        ),
+                    if (actionButtons != null)
+                      ...actionButtons!,
+                   ],
+                 )
+              ],
             ],
           ),
         ),
