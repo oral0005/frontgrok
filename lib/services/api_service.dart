@@ -7,19 +7,20 @@ import '../models/sender_post.dart';
 import '../models/user.dart';
 import 'dart:io';
 
-String? serverBaseUrl = dotenv.env['SERVER_AVATAR'];
+String? serverBaseUrl = 'http://192.168.56.1:5000';
 
 class ApiService {
-  // Use SERVER_URL from .env file with a fallback
-  static String baseUrl = dotenv.env['SERVER_URL'] ?? 'http://192.168.56.1:5000/api';
+  static const String baseUrl = 'http://192.168.56.1:5000/api';
 
-  Future<String?> _getToken() async {
+  /// Retrieves the authentication token from SharedPreferences.
+  Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     print('Retrieved token: $token');
     return token;
   }
 
+  /// Logs in a user and stores the token and user ID in SharedPreferences.
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
       final response = await http.post(
@@ -47,6 +48,7 @@ class ApiService {
     }
   }
 
+  /// Registers a new user.
   Future<void> register(String username, String password, String phoneNumber, String name, String surname) async {
     try {
       final response = await http.post(
@@ -73,8 +75,9 @@ class ApiService {
     }
   }
 
+  /// Fetches the authenticated user's profile.
   Future<User> getUserProfile() async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     try {
@@ -100,8 +103,9 @@ class ApiService {
     }
   }
 
+  /// Uploads an avatar image for the authenticated user.
   Future<String> uploadAvatar(File imageFile) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     var request = http.MultipartRequest(
@@ -123,13 +127,14 @@ class ApiService {
     }
   }
 
+  /// Updates the authenticated user's profile.
   Future<void> updateProfile({
     required String name,
     required String surname,
     String? avatarUrl,
     String? language,
   }) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     print('updateProfile body: ${json.encode({
@@ -158,6 +163,7 @@ class ApiService {
     }
   }
 
+  /// Fetches all courier posts.
   Future<List<CourierPost>> fetchCourierPosts() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/courier-posts'));
@@ -191,6 +197,7 @@ class ApiService {
     }
   }
 
+  /// Fetches all sender posts.
   Future<List<SenderPost>> fetchSenderPosts() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/sender-posts'));
@@ -224,8 +231,9 @@ class ApiService {
     }
   }
 
+  /// Fetches the authenticated user's courier posts.
   Future<List<CourierPost>> fetchMyCourierPosts() async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) {
       print('No token found in SharedPreferences');
       throw Exception('No token found');
@@ -271,8 +279,9 @@ class ApiService {
     }
   }
 
+  /// Fetches the authenticated user's sender posts.
   Future<List<SenderPost>> fetchMySenderPosts() async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) {
       print('No token found in SharedPreferences');
       throw Exception('No token found');
@@ -318,8 +327,9 @@ class ApiService {
     }
   }
 
+  /// Creates a new courier post for the authenticated user.
   Future<void> createCourierPost(String from, String to, DateTime sendTime, double parcelPrice, String description) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     try {
@@ -350,8 +360,9 @@ class ApiService {
     }
   }
 
+  /// Creates a new sender post for the authenticated user.
   Future<void> createSenderPost(String from, String to, DateTime sendTime, double parcelPrice, String description) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     try {
@@ -382,6 +393,7 @@ class ApiService {
     }
   }
 
+  /// Fetches the recommended price for a route.
   Future<double?> fetchRecommendedPrice(String from, String to) async {
     try {
       final response = await http.get(
@@ -401,12 +413,13 @@ class ApiService {
       }
     } catch (e) {
       print('Fetch recommended price error: $e');
-      return null; // Возвращаем null в случае ошибки, чтобы не прерывать UX
+      return null;
     }
   }
 
+  /// Deletes a sender post by ID for the authenticated user.
   Future<void> deleteSenderPost(String postId) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     try {
@@ -430,8 +443,9 @@ class ApiService {
     }
   }
 
+  /// Deletes a courier post by ID for the authenticated user.
   Future<void> deleteCourierPost(String postId) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     try {
@@ -455,12 +469,13 @@ class ApiService {
     }
   }
 
+  /// Changes the authenticated user's password.
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
     required String confirmPassword,
   }) async {
-    final token = await _getToken();
+    final token = await getToken();
     if (token == null) throw Exception('No token found');
 
     final response = await http.put(
@@ -482,6 +497,7 @@ class ApiService {
     }
   }
 
+  /// Sends a verification code to the specified phone number.
   Future<void> sendVerificationCode(String phoneNumber) async {
     try {
       print('Sending verification code to: $phoneNumber');
@@ -509,6 +525,7 @@ class ApiService {
     }
   }
 
+  /// Verifies the code sent to the specified phone number.
   Future<void> verifyCode(String phoneNumber, String code) async {
     try {
       print('Verifying code for: $phoneNumber');

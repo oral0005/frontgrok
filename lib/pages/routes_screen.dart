@@ -9,6 +9,7 @@ import '../widgets/tab_bar_widget.dart';
 import '../widgets/post_details_popup.dart';
 import '../widgets/custom_text_field.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'notification_screen.dart';
 
 class RoutesScreen extends StatefulWidget {
   const RoutesScreen({super.key});
@@ -30,7 +31,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
   String _sortBy = 'date';
   bool _sortAscending = false;
 
-  // Class-level controllers for price fields
   final TextEditingController _minPriceController = TextEditingController();
   final TextEditingController _maxPriceController = TextEditingController();
 
@@ -51,7 +51,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
   @override
   void dispose() {
-    // Dispose controllers when the widget is disposed
     _minPriceController.dispose();
     _maxPriceController.dispose();
     super.dispose();
@@ -100,6 +99,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
         price: post.parcelPrice,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
+        status: 'active',
         avatarUrl: post.user.avatarUrl,
       )));
 
@@ -114,11 +114,11 @@ class _RoutesScreenState extends State<RoutesScreen> {
         price: post.parcelPrice,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
+        status: 'active',
         avatarUrl: post.user.avatarUrl,
       )));
 
       print('Fetched ${senderPosts.length} sender posts and ${courierPosts.length} courier posts');
-
       return combinedPosts;
     } catch (e) {
       print('Error fetching posts: $e');
@@ -140,7 +140,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
     String? tempTo = _searchTo;
     DateTime? tempDate = _searchDate;
 
-    // Initialize controller values
     _minPriceController.text = _minPrice?.toString() ?? '';
     _maxPriceController.text = _maxPrice?.toString() ?? '';
 
@@ -175,24 +174,18 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Color(0xFF201731)),
                   ),
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                  labelStyle: const TextStyle(
-                      fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  labelStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
                 ),
                 value: tempFrom,
                 items: _kazakhstanCities
-                    .map((city) => DropdownMenuItem(
-                  value: city,
-                  child: Text(city.tr()),
-                ))
+                    .map((city) => DropdownMenuItem(value: city, child: Text(city.tr())))
                     .toList(),
                 onChanged: (value) => tempFrom = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                style:
-                const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
+                style: const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -211,24 +204,18 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Color(0xFF201731)),
                   ),
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                  labelStyle: const TextStyle(
-                      fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  labelStyle: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
                 ),
                 value: tempTo,
                 items: _kazakhstanCities
-                    .map((city) => DropdownMenuItem(
-                  value: city,
-                  child: Text(city.tr()),
-                ))
+                    .map((city) => DropdownMenuItem(value: city, child: Text(city.tr())))
                     .toList(),
                 onChanged: (value) => tempTo = value,
                 menuMaxHeight: 200,
                 isExpanded: true,
                 dropdownColor: Colors.white,
-                style:
-                const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
+                style: const TextStyle(fontFamily: 'Montserrat', color: Colors.black),
               ),
               const SizedBox(height: 16),
               TextButton(
@@ -241,17 +228,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
                   );
                   if (selectedDate != null) {
                     tempDate = selectedDate;
-                    if (mounted) {
-                      setState(() {});
-                    }
+                    if (mounted) setState(() {});
                   }
                 },
                 child: Text(
                   tempDate == null
                       ? 'select_date'.tr()
                       : 'date'.tr() + ': ${tempDate.toString().substring(0, 10)}',
-                  style: const TextStyle(
-                      fontFamily: 'Montserrat', color: Colors.grey),
+                  style: const TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 16),
@@ -271,9 +255,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             child: Text(
               'cancel'.tr(),
               style: const TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
@@ -299,15 +281,10 @@ class _RoutesScreenState extends State<RoutesScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF201731),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: Text(
-              'search'.tr(),
-              style: const TextStyle(fontFamily: 'Montserrat'),
-            ),
+            child: Text('search'.tr(), style: const TextStyle(fontFamily: 'Montserrat')),
           ),
         ],
       ),
@@ -316,13 +293,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
   void _sortPosts(List<Post> posts) {
     if (_sortBy == 'date') {
-      posts.sort((a, b) => _sortAscending
-          ? a.date.compareTo(b.date)
-          : b.date.compareTo(a.date));
+      posts.sort((a, b) => _sortAscending ? a.date.compareTo(b.date) : b.date.compareTo(a.date));
     } else if (_sortBy == 'price') {
-      posts.sort((a, b) => _sortAscending
-          ? a.price.compareTo(b.price)
-          : b.price.compareTo(a.price));
+      posts.sort((a, b) => _sortAscending ? a.price.compareTo(b.price) : b.price.compareTo(a.price));
     }
   }
 
@@ -330,16 +303,12 @@ class _RoutesScreenState extends State<RoutesScreen> {
   Widget build(BuildContext context) {
     return Theme(
       data: Theme.of(context).copyWith(
-        textTheme: Theme.of(context).textTheme.apply(
-          fontFamily: 'Montserrat',
-          fontFamilyFallback: ['Roboto'],
-        ),
+        textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Montserrat', fontFamilyFallback: ['Roboto']),
       ),
       child: Scaffold(
         backgroundColor: const Color(0xFFFEF7FF),
         appBar: AppBar(
-          title: Text('routes'.tr(),
-              style: TextStyle(fontFamily: 'Montserrat')),
+          title: Text('routes'.tr(), style: const TextStyle(fontFamily: 'Montserrat')),
           centerTitle: true,
           automaticallyImplyLeading: false,
           leading: IconButton(
@@ -347,6 +316,15 @@ class _RoutesScreenState extends State<RoutesScreen> {
             onPressed: _showSearchDialog,
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                );
+              },
+            ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (mounted) {
@@ -364,23 +342,19 @@ class _RoutesScreenState extends State<RoutesScreen> {
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'date_desc',
-                  child: Text('sort_by_date_newest'.tr(),
-                      style: TextStyle(fontFamily: 'Montserrat')),
+                  child: Text('sort_by_date_newest'.tr(), style: const TextStyle(fontFamily: 'Montserrat')),
                 ),
                 PopupMenuItem(
                   value: 'date_asc',
-                  child: Text('sort_by_date_oldest'.tr(),
-                      style: TextStyle(fontFamily: 'Montserrat')),
+                  child: Text('sort_by_date_oldest'.tr(), style: const TextStyle(fontFamily: 'Montserrat')),
                 ),
                 PopupMenuItem(
                   value: 'price_asc',
-                  child: Text('sort_by_price_low'.tr(),
-                      style: TextStyle(fontFamily: 'Montserrat')),
+                  child: Text('sort_by_price_low'.tr(), style: const TextStyle(fontFamily: 'Montserrat')),
                 ),
                 PopupMenuItem(
                   value: 'price_desc',
-                  child: Text('sort_by_price_high'.tr(),
-                      style: TextStyle(fontFamily: 'Montserrat')),
+                  child: Text('sort_by_price_high'.tr(), style: const TextStyle(fontFamily: 'Montserrat')),
                 ),
               ],
             ),
@@ -392,9 +366,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
               firstTab: 'courier_posts'.tr(),
               secondTab: 'sender_posts'.tr(),
               onTabChanged: (index) {
-                if (mounted) {
-                  setState(() => _selectedTabIndex = index);
-                }
+                if (mounted) setState(() => _selectedTabIndex = index);
               },
             ),
             Expanded(
@@ -408,44 +380,25 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     }
                     if (snapshot.hasError) {
                       print('Snapshot error: ${snapshot.error}');
-                      return Center(
-                        child: Text('Error: ${snapshot.error}',
-                            style: const TextStyle(fontFamily: 'Montserrat')),
-                      );
+                      return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(fontFamily: 'Montserrat')));
                     }
                     final posts = snapshot.data ?? [];
                     if (posts.isEmpty) {
                       print('No posts available in snapshot');
-                      return const Center(
-                        child: Text('No posts available',
-                            style: TextStyle(fontFamily: 'Montserrat')),
-                      );
+                      return const Center(child: Text('No posts available', style: TextStyle(fontFamily: 'Montserrat')));
                     }
 
                     var filteredPosts = _selectedTabIndex == 0
-                        ? posts
-                        .where((post) =>
-                    post.type == 'courier' &&
-                        post.userId != _currentUserId)
-                        .toList()
-                        : posts
-                        .where((post) =>
-                    post.type == 'sender' &&
-                        post.userId != _currentUserId)
-                        .toList();
+                        ? posts.where((post) => post.type == 'courier' && post.userId != _currentUserId).toList()
+                        : posts.where((post) => post.type == 'sender' && post.userId != _currentUserId).toList();
 
-                    print(
-                        'Filtered ${_selectedTabIndex == 0 ? 'courier' : 'sender'} posts: ${filteredPosts.length}');
+                    print('Filtered ${_selectedTabIndex == 0 ? 'courier' : 'sender'} posts: ${filteredPosts.length}');
 
                     if (_searchFrom != null) {
-                      filteredPosts = filteredPosts
-                          .where((post) => post.from == _searchFrom)
-                          .toList();
+                      filteredPosts = filteredPosts.where((post) => post.from == _searchFrom).toList();
                     }
                     if (_searchTo != null) {
-                      filteredPosts = filteredPosts
-                          .where((post) => post.to == _searchTo)
-                          .toList();
+                      filteredPosts = filteredPosts.where((post) => post.to == _searchTo).toList();
                     }
                     if (_searchDate != null) {
                       filteredPosts = filteredPosts
@@ -456,26 +409,19 @@ class _RoutesScreenState extends State<RoutesScreen> {
                           .toList();
                     }
                     if (_minPrice != null) {
-                      filteredPosts = filteredPosts
-                          .where((post) => post.price >= _minPrice!)
-                          .toList();
+                      filteredPosts = filteredPosts.where((post) => post.price >= _minPrice!).toList();
                     }
                     if (_maxPrice != null) {
-                      filteredPosts = filteredPosts
-                          .where((post) => post.price <= _maxPrice!)
-                          .toList();
+                      filteredPosts = filteredPosts.where((post) => post.price <= _maxPrice!).toList();
                     }
 
                     _sortPosts(filteredPosts);
 
                     if (filteredPosts.isEmpty) {
-                      print(
-                          'No posts after filtering for ${_selectedTabIndex == 0 ? 'courier' : 'sender'}');
+                      print('No posts after filtering for ${_selectedTabIndex == 0 ? 'courier' : 'sender'}');
                       return Center(
                         child: Text(
-                          _selectedTabIndex == 0
-                              ? 'no_courier_posts_available'.tr()
-                              : 'no_sender_posts_available'.tr(),
+                          _selectedTabIndex == 0 ? 'no_courier_posts_available'.tr() : 'no_sender_posts_available'.tr(),
                           style: const TextStyle(fontFamily: 'Montserrat'),
                         ),
                       );
@@ -491,12 +437,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
                           date: post.date,
                           userLocation: post.userLocation,
                           price: post.price,
-                          onMorePressed: () =>
-                              PostDetailsPopup.show(context, post),
+                          onMorePressed: () => PostDetailsPopup.show(context, post),
                           leading: Icon(
-                            post.type == 'sender'
-                                ? Icons.send
-                                : Icons.local_shipping,
+                            post.type == 'sender' ? Icons.send : Icons.local_shipping,
                             color: const Color(0xFF201731),
                           ),
                         );

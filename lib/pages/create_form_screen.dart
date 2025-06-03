@@ -6,11 +6,13 @@ import '../services/api_service.dart';
 import '../widgets/appinio_animated_toggle_tab.dart';
 import 'my_posts_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../models/user.dart';
 
 class CreateFormScreen extends StatefulWidget {
+  final User currentUser;
   final VoidCallback? onPostCreated;
 
-  const CreateFormScreen({super.key, this.onPostCreated});
+  const CreateFormScreen({super.key, required this.currentUser, this.onPostCreated});
 
   @override
   _CreateFormScreenState createState() => _CreateFormScreenState();
@@ -157,7 +159,7 @@ class _CreateFormScreenState extends State<CreateFormScreen> {
         print('Navigating to HomeScreen');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => HomeScreen(currentUser: widget.currentUser)),
         );
       } else {
         print('Widget not mounted, skipping navigation');

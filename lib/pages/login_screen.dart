@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user.language != null) {
           await context.setLocale(Locale(user.language!));
         }
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen(currentUser: user)));
       }
     } catch (e) {
       if (mounted) {

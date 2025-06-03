@@ -30,8 +30,6 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
   String _sortBy = 'date';
   bool _sortAscending = false;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -64,9 +62,13 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
   Future<List<Post>> _fetchMyPosts() async {
     try {
+      if (_currentUserId == null) {
+        return [];
+      }
+
       final results = await Future.wait([
-        _apiService.fetchMySenderPosts(),
-        _apiService.fetchMyCourierPosts(),
+        _apiService.fetchMySenderPosts(), // Fetch all sender posts
+        _apiService.fetchMyCourierPosts(), // Fetch all courier posts
       ]);
 
       final List<SenderPost> senderPosts = results[0] as List<SenderPost>;
@@ -74,7 +76,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 
       final List<Post> combinedPosts = [];
 
-      combinedPosts.addAll(senderPosts.map((post) => Post(
+      // Add sender posts, excluding those with status 'active'
+      combinedPosts.addAll(senderPosts.where((post) => post.status != 'active').map((post) => Post(
         type: 'sender',
         from: post.from,
         to: post.to,
@@ -85,9 +88,12 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         price: post.parcelPrice,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
+        status: post.status, // Use actual status from backend
+        avatarUrl: post.user.avatarUrl,
       )));
 
-      combinedPosts.addAll(courierPosts.map((post) => Post(
+      // Add courier posts, excluding those with status 'active'
+      combinedPosts.addAll(courierPosts.where((post) => post.status != 'active').map((post) => Post(
         type: 'courier',
         from: post.from,
         to: post.to,
@@ -98,6 +104,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         price: post.parcelPrice,
         description: post.description,
         phoneNumber: post.user.phoneNumber,
+        status: post.status, // Use actual status from backend
+        avatarUrl: post.user.avatarUrl,
       )));
 
       return combinedPosts;
@@ -138,7 +146,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'error_deleting_post',
+              'error_deleting_post'.tr(),
               style: const TextStyle(fontFamily: 'Montserrat'),
             ),
           ),
@@ -154,8 +162,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
           : b.date.compareTo(a.date));
     } else if (_sortBy == 'price') {
       posts.sort((a, b) => _sortAscending
-          ? (a.price).compareTo(b.price)
-          : (b.price).compareTo(a.price));
+          ? a.price.compareTo(b.price)
+          : b.price.compareTo(a.price));
     }
   }
 
@@ -257,12 +265,12 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                     }
                     if (_minPrice != null) {
                       filteredPosts = filteredPosts
-                          .where((post) => (post.price) >= _minPrice!)
+                          .where((post) => post.price >= _minPrice!)
                           .toList();
                     }
                     if (_maxPrice != null) {
                       filteredPosts = filteredPosts
-                          .where((post) => (post.price) <= _maxPrice!)
+                          .where((post) => post.price <= _maxPrice!)
                           .toList();
                     }
 

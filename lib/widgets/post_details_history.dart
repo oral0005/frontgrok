@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/post.dart';
 import '../services/api_service.dart';
-import 'package:http/http.dart' as http;
 
 String getAvatarUrl(String? avatarUrl) {
   if (avatarUrl == null || avatarUrl.isEmpty) return '';
@@ -12,9 +10,8 @@ String getAvatarUrl(String? avatarUrl) {
   return '${ApiService.baseUrl}/$avatarUrl';
 }
 
-class PostDetailsPopup {
+class PostDetailsHistory {
   static void show(BuildContext context, Post post) {
-    final ApiService _apiService = ApiService();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -151,64 +148,6 @@ class PostDetailsPopup {
                     Icons.description,
                     '${'description'.tr()}: ${post.description.isEmpty ? 'no_description'.tr() : post.description}',
                     Colors.grey,
-                  ),
-                  const SizedBox(height: 24),
-                  if (post.phoneNumber != null && post.phoneNumber!.isNotEmpty)
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          final url = 'tel:${post.phoneNumber}';
-                          if (await canLaunchUrl(Uri.parse(url))) {
-                            await launchUrl(Uri.parse(url));
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('cannot_launch_phone'.tr(), style: const TextStyle(fontFamily: 'Montserrat'))),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.phone, size: 18),
-                        label: Text('contact'.tr()),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF201731),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          final token = await _apiService.getToken();
-                          if (token == null) throw Exception('No token found');
-                          final response = await http.post(
-                            Uri.parse('${ApiService.baseUrl}/${post.type}-posts/${post.postId}/activate'),
-                            headers: {'x-auth-token': token},
-                          );
-                          if (response.statusCode == 200) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('activation_request_sent'.tr())),
-                            );
-                          } else {
-                            throw Exception('Failed to send activation request');
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
-                          );
-                        }
-                      },
-                      child: Text('activate'.tr()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF201731),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      ),
-                    ),
                   ),
                 ],
               ),

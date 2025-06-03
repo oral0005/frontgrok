@@ -8,8 +8,9 @@ class Post {
   final String postId;
   final double price;
   final String description;
-  final String? phoneNumber;
-  final String? avatarUrl;
+  final String phoneNumber;
+  final String status;
+  final String? avatarUrl; // Nullable to match routes_screen.dart and post_details_popup.dart
 
   Post({
     required this.type,
@@ -21,7 +22,8 @@ class Post {
     required this.postId,
     required this.price,
     required this.description,
-    this.phoneNumber,
+    required this.phoneNumber,
+    required this.status,
     this.avatarUrl,
   });
 }

@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // Disable the debug banner
       home: const StartScreen(),
       routes: {
-        '/home': (context) => const HomeScreen(),
+        // '/home': (context) => const HomeScreen(), // Commented out due to required currentUser
       },
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
