@@ -190,10 +190,27 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
         ),
         body: Column(
           children: [
-            TabBarWidget(
-              firstTab: 'courier_posts'.tr(),
-              secondTab: 'sender_posts'.tr(),
-              onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+            DefaultTabController(
+              length: 2,
+              initialIndex: _selectedTabIndex,
+              child: TabBar(
+                onTap: (index) => setState(() => _selectedTabIndex = index),
+                labelColor: Color(0xFF201731),
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Color(0xFF201731),
+                labelStyle: const TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: [
+                  Tab(text: 'courier_posts'.tr()),
+                  Tab(text: 'sender_posts'.tr()),
+                ],
+              ),
             ),
             Expanded(
               child: RefreshIndicator(

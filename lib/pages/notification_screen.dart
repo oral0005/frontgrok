@@ -79,7 +79,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (token == null) throw Exception('No token found');
     final response = await http.put(
       Uri.parse('${ApiService.baseUrl}/notifications/$notificationId/read'),
-      headers: {'x-auth-test': token},
+      headers: {'x-auth-token': token},
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to mark notification as read: ${response.body}');
@@ -151,6 +151,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
+  String translateNotification(String message) {
+    final activateRegExp = RegExp(r'User (.+) wants to activate your courier post from (.+) to (.+)');
+    final acceptedRegExp = RegExp(r'Your activation request for courier post from (.+) to (.+) was accepted');
+    if (activateRegExp.hasMatch(message)) {
+      final match = activateRegExp.firstMatch(message)!;
+      return 'user_wants_to_activate_courier_post'.tr(args: [match.group(1)!, match.group(2)!, match.group(3)!]);
+    }
+    if (acceptedRegExp.hasMatch(message)) {
+      final match = acceptedRegExp.firstMatch(message)!;
+      return 'activation_request_accepted'.tr(args: [match.group(1)!, match.group(2)!]);
+    }
+    return message.tr();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,7 +187,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             itemBuilder: (context, index) {
               final notification = notifications[index];
               return ListTile(
-                title: Text(notification.message),
+                title: Text(translateNotification(notification.message)),
                 subtitle: Text('${'from'.tr()}: ${notification.sender.username} • ${notification.formattedCreatedAt}'),
                 trailing: notification.read
                     ? const Icon(Icons.check, color: Colors.green)

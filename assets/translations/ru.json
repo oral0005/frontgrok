@@ -105,5 +105,10 @@
   "resend_code": "Отправить код повторно",
   "verification_code_resent": "Код подтверждения отправлен повторно",
   "phone_verified": "Телефон подтверждён",
-  "phone_not_verified": "Телефон не подтверждён"
+  "phone_not_verified": "Телефон не подтверждён",
+  "history": "История",
+  "notifications": "Уведомления",
+  "user_responded_courier_post": "Пользователь {0} откликнулся на ваш курьер пост от {from} в {to}",
+  "activation_request_accepted": "Ваш запрос на активацию курьер поста от {0} в {1} был принят",
+  "user_wants_to_activate_courier_post": "Пользователь {0} хочет активировать ваш курьерский пост от {1} в {2}"
 }

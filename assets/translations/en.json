@@ -105,5 +105,10 @@
     "resend_code": "Resend code",
     "verification_code_resent": "Verification code has been resent",
     "phone_verified": "Phone verified",
-    "phone_not_verified": "Phone not verified"
+    "phone_not_verified": "Phone not verified",
+    "history": "History",
+    "notifications": "Notifications",
+    "user_responded_courier_post": "Such user responded to your courier post from {from} to {to}",
+    "activation_request_accepted": "Your activation request for courier post from {from} to {to} was accepted",
+    "user_wants_to_activate_courier_post": "User {user} wants to activate your courier post from {from} to {to}"
   }

@@ -24,7 +24,6 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<Post>> _postsFuture;
-  int _selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -156,11 +155,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         body: Column(
           children: [
-            TabBarWidget(
-              firstTab: 'active_posts'.tr(),
-              secondTab: 'completed_posts'.tr(),
-              onTabChanged: (index) => setState(() => _selectedTabIndex = index),
-            ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _refreshPosts,
@@ -209,17 +203,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       );
                     }
 
-                    final filteredPosts = _selectedTabIndex == 0
-                        ? posts.where((post) => post.status == 'active').toList()
-                        : posts.where((post) => post.status == 'completed').toList();
-                    print('Filtered posts for tab $_selectedTabIndex: ${filteredPosts.map((p) => p.status).toList()}');
-
+                    final filteredPosts = posts.where((post) => post.status == 'active').toList();
                     if (filteredPosts.isEmpty) {
                       return Center(
                         child: Text(
-                          _selectedTabIndex == 0
-                              ? 'no_active_posts'.tr()
-                              : 'no_completed_posts'.tr(),
+                          'no_active_posts'.tr(),
                           style: const TextStyle(fontFamily: 'Montserrat'),
                         ),
                       );

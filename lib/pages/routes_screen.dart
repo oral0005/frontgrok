@@ -30,6 +30,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
   double? _maxPrice;
   String _sortBy = 'date';
   bool _sortAscending = false;
+  Future<List<dynamic>>? _notificationsFuture;
+  int _unreadCount = 0;
 
   final TextEditingController _minPriceController = TextEditingController();
   final TextEditingController _maxPriceController = TextEditingController();
@@ -47,6 +49,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
   void initState() {
     super.initState();
     _posts = _loadCurrentUserId();
+    _notificationsFuture = _loadNotifications();
   }
 
   @override
@@ -133,6 +136,18 @@ class _RoutesScreenState extends State<RoutesScreen> {
       });
     }
     return Future.delayed(const Duration(milliseconds: 100));
+  }
+
+  Future<List<dynamic>> _loadNotifications() async {
+    try {
+      final notifications = await _apiService.fetchNotifications();
+      setState(() {
+        _unreadCount = notifications.where((n) => n['read'] == false).length;
+      });
+      return notifications;
+    } catch (e) {
+      return [];
+    }
   }
 
   void _showSearchDialog() {
@@ -317,12 +332,39 @@ class _RoutesScreenState extends State<RoutesScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.notifications),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(Icons.notifications, size: 28),
+                  if (_unreadCount > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _unreadCount > 99 ? '99+' : '$_unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const NotificationScreen()),
-                );
+                ).then((_) => _loadNotifications());
               },
             ),
             PopupMenuButton<String>(
@@ -362,12 +404,29 @@ class _RoutesScreenState extends State<RoutesScreen> {
         ),
         body: Column(
           children: [
-            TabBarWidget(
-              firstTab: 'courier_posts'.tr(),
-              secondTab: 'sender_posts'.tr(),
-              onTabChanged: (index) {
-                if (mounted) setState(() => _selectedTabIndex = index);
-              },
+            DefaultTabController(
+              length: 2,
+              initialIndex: _selectedTabIndex,
+              child: TabBar(
+                onTap: (index) {
+                  if (mounted) setState(() => _selectedTabIndex = index);
+                },
+                labelColor: Color(0xFF201731),
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Color(0xFF201731),
+                labelStyle: const TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: [
+                  Tab(text: 'courier_posts'.tr()),
+                  Tab(text: 'sender_posts'.tr()),
+                ],
+              ),
             ),
             Expanded(
               child: RefreshIndicator(

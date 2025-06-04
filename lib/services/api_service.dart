@@ -555,4 +555,20 @@ class ApiService {
       throw Exception('Failed to verify code: $e');
     }
   }
+
+  /// Fetches all notifications for the authenticated user.
+  Future<List<dynamic>> fetchNotifications() async {
+    final token = await getToken();
+    if (token == null) throw Exception('No token found');
+    final response = await http.get(
+      Uri.parse('$baseUrl/notifications'),
+      headers: {'x-auth-token': token},
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List;
+      return data;
+    } else {
+      throw Exception('Failed to fetch notifications: ${response.body}');
+    }
+  }
 }
