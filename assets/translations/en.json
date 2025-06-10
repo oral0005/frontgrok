@@ -1,7 +1,9 @@
 {
     "profile": "Profile",
+    "login": "Login",
     "settings": "Settings",
     "logout": "Logout",
+    "confirm_password": "Confirm Password",
     "name": "Name",
     "surname": "Surname",
     "save": "Save",
@@ -57,7 +59,7 @@
     "Pavlodar": "Pavlodar",
     "Ust-Kamenogorsk": "Ust-Kamenogorsk",
     "Semey": "Semey",
-    "Atyrau": "Atyrau",
+    " Atyrau": "Atyrau",
     "Kostanay": "Kostanay",
     "Kyzylorda": "Kyzylorda",
     "Uralsk": "Uralsk",
@@ -110,5 +112,12 @@
     "notifications": "Notifications",
     "user_responded_courier_post": "Such user responded to your courier post from {from} to {to}",
     "activation_request_accepted": "Your activation request for courier post from {from} to {to} was accepted",
-    "user_wants_to_activate_courier_post": "User {user} wants to activate your courier post from {from} to {to}"
-  }
+    "user_wants_to_activate_courier_post": "User {user} wants to activate your courier post from {from} to {to}",
+    "activation_request": "Activation Request",
+    "accept_request": "User {0} wants to activate your {1} post",
+    "request_accepted": "Request accepted",
+    "request_rejected": "Request rejected",
+    "no_notifications": "No notifications",
+    "accept": "Accept",
+    "reject": "Reject"
+}

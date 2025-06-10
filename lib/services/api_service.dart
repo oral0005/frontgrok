@@ -7,10 +7,10 @@ import '../models/sender_post.dart';
 import '../models/user.dart';
 import 'dart:io';
 
-String? serverBaseUrl = 'https://backend-posylka.onrender.com';
+String? serverBaseUrl = 'http://192.168.56.1:5050';
 
 class ApiService {
-  static const String baseUrl = 'https://backend-posylka.onrender.com/api';
+  static const String baseUrl = 'http://192.168.56.1:5050/api';
 
   /// Retrieves the authentication token from SharedPreferences.
   Future<String?> getToken() async {
