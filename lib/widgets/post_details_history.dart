@@ -10,8 +10,8 @@ String getAvatarUrl(String? avatarUrl) {
   return '${ApiService.baseUrl}/$avatarUrl';
 }
 
-class PostDetailsHistory {
-  static void show(BuildContext context, Post post) {
+class PostDetailsHistoryAssigned {
+  static void show(BuildContext context, Post post, {String? assignedSender, String? assignedCourier}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -79,16 +79,44 @@ class PostDetailsHistory {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: (post.avatarUrl != null && post.avatarUrl!.isNotEmpty)
-                            ? NetworkImage(getAvatarUrl(post.avatarUrl))
-                            : null,
-                        child: (post.avatarUrl == null || post.avatarUrl!.isEmpty)
-                            ? const Icon(Icons.person, size: 30, color: Colors.grey)
-                            : null,
+                      const Icon(Icons.person, size: 18, color: Colors.blueGrey),
+
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (assignedSender != null)
+                              Text(
+                                '${'sender'.tr()}: $assignedSender',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Montserrat',
+                                  color: Color(0xFF201731),
+                                ),
+                              ),
+                            if (assignedCourier != null)
+                              Text(
+                                '${'courier'.tr()}: $assignedCourier',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Montserrat',
+                                  color: Color(0xFF201731),
+                                ),
+                              ),
+
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                  const Divider(height: 24, thickness: 1, color: Colors.grey),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.person, size: 18, color: Colors.blueGrey),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -104,25 +132,13 @@ class PostDetailsHistory {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.phone, size: 16, color: Colors.grey),
-                                const SizedBox(width: 8),
-                                Text(
-                                  post.phoneNumber ?? 'not_provided'.tr(),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'Montserrat',
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
+
                           ],
                         ),
                       ),
                     ],
                   ),
+                  const Divider(height: 24, thickness: 1, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
                     'details'.tr(),

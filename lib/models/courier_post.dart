@@ -10,7 +10,9 @@ class CourierPost {
   final String description;
   final User user;
   final DateTime dateCreated;
-  final String status; // Added status field
+  final String status;
+  final User? assignedSender;
+  final User? assignedCourier;// Populated User object from API
 
   CourierPost({
     required this.id,
@@ -21,7 +23,9 @@ class CourierPost {
     required this.description,
     required this.user,
     required this.dateCreated,
-    required this.status, // Required parameter
+    required this.status,
+    this.assignedSender,
+    this.assignedCourier,
   });
 
   factory CourierPost.fromJson(Map<String, dynamic> json) {
@@ -34,7 +38,8 @@ class CourierPost {
       description: json['description']?.toString() ?? '',
       user: User.fromJson(json['userId'] is Map<String, dynamic> ? json['userId'] : {}),
       dateCreated: DateTime.tryParse(json['dateCreated']?.toString() ?? '') ?? DateTime.now(),
-      status: json['status']?.toString() ?? 'open', // Default to 'open' if not present
+      status: json['status']?.toString() ?? 'open',
+      assignedSender: json['assignedSender'] != null ? User.fromJson(json['assignedSender']) : null,
     );
   }
 

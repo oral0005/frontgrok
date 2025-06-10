@@ -7,6 +7,8 @@ class PostCardHistory extends StatelessWidget {
   final String to;
   final DateTime date;
   final String userLocation;
+  final String? assignedSender;
+  final String? assignedCourier;
   final double price;
   final VoidCallback onMorePressed;
   final Widget? leading;
@@ -17,6 +19,8 @@ class PostCardHistory extends StatelessWidget {
     required this.to,
     required this.date,
     required this.userLocation,
+    this.assignedSender,
+    this.assignedCourier,
     required this.price,
     required this.onMorePressed,
     this.leading,
@@ -91,6 +95,32 @@ class PostCardHistory extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              if (assignedSender != null || assignedCourier != null) ...[
+                Row(
+                  children: [
+                    const Icon(Icons.person, size: 18, color: Colors.blueGrey),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (assignedSender != null)
+                            Text(
+                              '${'sender'.tr()}: $assignedSender',
+                              style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14),
+                            ),
+                          if (assignedCourier != null)
+                            Text(
+                              '${'courier'.tr()}: $assignedCourier',
+                              style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const Divider(height: 20),
               Align(
                 alignment: Alignment.centerRight,

@@ -6,9 +6,8 @@ import '../models/courier_post.dart';
 import '../models/sender_post.dart';
 import '../models/post.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../widgets/post_card_history.dart'; // Updated import
-import '../widgets/tab_bar_widget.dart';
-import '../widgets/post_details_history.dart'; // Updated import
+import '../widgets/post_card_history.dart';
+import '../widgets/post_details_history.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -47,12 +46,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       final List<Post> combinedPosts = [];
 
+      // Map SenderPosts
       combinedPosts.addAll(activeSenderPosts.map((post) => Post(
         type: 'sender',
         from: post.from,
         to: post.to,
         date: post.sendTime,
-        userLocation: '${post.user.name} ${post.user.surname}',
+        userLocation: '${post.user.name} ${post.user.surname}', // Current user (sender)
         userId: post.user.id,
         postId: post.id,
         price: post.parcelPrice,
@@ -60,6 +60,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         phoneNumber: post.user.phoneNumber,
         status: post.status,
         avatarUrl: post.user.avatarUrl,
+        assignedCourier: post.assignedCourier != null ? '${post.assignedCourier?.name ?? ''} ${post.assignedCourier?.surname ?? ''}' : null,
       )));
 
       combinedPosts.addAll(activeCourierPosts.map((post) => Post(
@@ -67,7 +68,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         from: post.from,
         to: post.to,
         date: post.sendTime,
-        userLocation: '${post.user.name} ${post.user.surname}',
+        userLocation: '${post.user.name} ${post.user.surname}', // Current user (courier)
         userId: post.user.id,
         postId: post.id,
         price: post.parcelPrice,
@@ -75,6 +76,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         phoneNumber: post.user.phoneNumber,
         status: post.status,
         avatarUrl: post.user.avatarUrl,
+        assignedSender: post.assignedSender != null ? '${post.assignedSender?.name ?? ''} ${post.assignedSender?.surname ?? ''}' : null,
       )));
 
       combinedPosts.addAll(completedSenderPosts.map((post) => Post(
@@ -90,6 +92,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         phoneNumber: post.user.phoneNumber,
         status: post.status,
         avatarUrl: post.user.avatarUrl,
+        assignedCourier: post.assignedCourier != null ? '${post.assignedCourier?.name ?? ''} ${post.assignedCourier?.surname ?? ''}' : null,
       )));
 
       combinedPosts.addAll(completedCourierPosts.map((post) => Post(
@@ -105,6 +108,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         phoneNumber: post.user.phoneNumber,
         status: post.status,
         avatarUrl: post.user.avatarUrl,
+        assignedSender: post.assignedSender != null ? '${post.assignedSender?.name ?? ''} ${post.assignedSender?.surname ?? ''}' : null,
       )));
 
       return combinedPosts;
@@ -224,8 +228,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               to: post.to.tr(),
                               date: post.date,
                               userLocation: post.userLocation,
+                              assignedSender: post.assignedSender,
+                              assignedCourier: post.assignedCourier,
                               price: post.price,
-                              onMorePressed: () => PostDetailsHistory.show(context, post),
+                              onMorePressed: () => PostDetailsHistoryAssigned.show(
+                                context,
+                                post,
+                                assignedSender: post.assignedSender,
+                                assignedCourier: post.assignedCourier,
+                              ),
                               leading: Icon(
                                 post.type == 'sender' ? Icons.send : Icons.local_shipping,
                                 color: const Color(0xFF201731),

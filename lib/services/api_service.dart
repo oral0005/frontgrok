@@ -163,6 +163,178 @@ class ApiService {
     }
   }
 
+  /// Fetches active sender posts for the authenticated user.
+  Future<List<SenderPost>> fetchActiveSenderPosts() async {
+    final token = await getToken();
+    if (token == null) throw Exception('No token found');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/sender-posts/active'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+
+      print('Fetch active sender posts response status: ${response.statusCode}');
+      print('Fetch active sender posts response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          throw Exception('Empty response body');
+        }
+        final decoded = jsonDecode(response.body);
+        if (decoded is! List) {
+          throw Exception('Expected a list of posts, but got: ${decoded.runtimeType}');
+        }
+        return decoded.map((json) => SenderPost.fromJson(json)).toList();
+      } else {
+        String errorMessage = 'Failed to load active sender posts: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = jsonDecode(response.body);
+            errorMessage = errorBody['msg']?.toString() ?? errorMessage;
+          } catch (e) {
+            errorMessage = 'Failed to parse error response: ${response.statusCode} ${response.body}';
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Active sender posts fetch error: $e');
+    }
+  }
+
+  /// Fetches active courier posts for the authenticated user.
+  Future<List<CourierPost>> fetchActiveCourierPosts() async {
+    final token = await getToken();
+    if (token == null) throw Exception('No token found');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/courier-posts/active'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+
+      print('Fetch active courier posts response status: ${response.statusCode}');
+      print('Fetch active courier posts response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          throw Exception('Empty response body');
+        }
+        final decoded = jsonDecode(response.body);
+        if (decoded is! List) {
+          throw Exception('Expected a list of posts, but got: ${decoded.runtimeType}');
+        }
+        return decoded.map((json) => CourierPost.fromJson(json)).toList();
+      } else {
+        String errorMessage = 'Failed to load active courier posts: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = jsonDecode(response.body);
+            errorMessage = errorBody['msg']?.toString() ?? errorMessage;
+          } catch (e) {
+            errorMessage = 'Failed to parse error response: ${response.statusCode} ${response.body}';
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Active courier posts fetch error: $e');
+    }
+  }
+
+  /// Fetches completed sender posts for the authenticated user.
+  Future<List<SenderPost>> getCompletedSenderPosts() async {
+    final token = await getToken();
+    if (token == null) throw Exception('No token found');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/sender-posts/completed'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+
+      print('Fetch completed sender posts response status: ${response.statusCode}');
+      print('Fetch completed sender posts response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          throw Exception('Empty response body');
+        }
+        final decoded = jsonDecode(response.body);
+        if (decoded is! List) {
+          throw Exception('Expected a list of posts, but got: ${decoded.runtimeType}');
+        }
+        return decoded.map((json) => SenderPost.fromJson(json)).toList();
+      } else {
+        String errorMessage = 'Failed to load completed sender posts: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = jsonDecode(response.body);
+            errorMessage = errorBody['msg']?.toString() ?? errorMessage;
+          } catch (e) {
+            errorMessage = 'Failed to parse error response: ${response.statusCode} ${response.body}';
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Completed sender posts fetch error: $e');
+    }
+  }
+
+  /// Fetches completed courier posts for the authenticated user.
+  Future<List<CourierPost>> getCompletedCourierPosts() async {
+    final token = await getToken();
+    if (token == null) throw Exception('No token found');
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/courier-posts/completed'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      );
+
+      print('Fetch completed courier posts response status: ${response.statusCode}');
+      print('Fetch completed courier posts response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          throw Exception('Empty response body');
+        }
+        final decoded = jsonDecode(response.body);
+        if (decoded is! List) {
+          throw Exception('Expected a list of posts, but got: ${decoded.runtimeType}');
+        }
+        return decoded.map((json) => CourierPost.fromJson(json)).toList();
+      } else {
+        String errorMessage = 'Failed to load completed courier posts: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = jsonDecode(response.body);
+            errorMessage = errorBody['msg']?.toString() ?? errorMessage;
+          } catch (e) {
+            errorMessage = 'Failed to parse error response: ${response.statusCode} ${response.body}';
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      throw Exception('Completed courier posts fetch error: $e');
+    }
+  }
+
   /// Fetches all courier posts.
   Future<List<CourierPost>> fetchCourierPosts() async {
     try {

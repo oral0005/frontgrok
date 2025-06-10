@@ -10,7 +10,11 @@ class Post {
   final String description;
   final String phoneNumber;
   final String status;
-  final String? avatarUrl; // Nullable to match routes_screen.dart and post_details_popup.dart
+  final String? avatarUrl;
+  final String? assignedSender;
+  final String? assignedCourier;
+  final String? assignedSenderId;
+  final String? assignedCourierId;
 
   Post({
     required this.type,
@@ -25,5 +29,9 @@ class Post {
     required this.phoneNumber,
     required this.status,
     this.avatarUrl,
+    this.assignedSender,
+    this.assignedCourier,
+    this.assignedSenderId,
+    this.assignedCourierId,
   });
 }

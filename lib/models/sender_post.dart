@@ -8,7 +8,9 @@ class SenderPost {
   final double parcelPrice;
   final String description;
   final User user;
-  final String status; // Added status field
+  final String status;
+  final User? assignedCourier;
+  final User? assignedSender;// Populated User object from API
 
   SenderPost({
     required this.id,
@@ -18,7 +20,9 @@ class SenderPost {
     required this.parcelPrice,
     required this.description,
     required this.user,
-    required this.status, // Required parameter
+    required this.status,
+    this.assignedCourier,
+    this.assignedSender,
   });
 
   factory SenderPost.fromJson(Map<String, dynamic> json) {
@@ -30,7 +34,8 @@ class SenderPost {
       parcelPrice: (json['parcelPrice'] as num?)?.toDouble() ?? 0.0,
       description: json['description']?.toString() ?? '',
       user: User.fromJson(json['userId'] is Map<String, dynamic> ? json['userId'] : {}),
-      status: json['status']?.toString() ?? 'open', // Default to 'open' if not present
+      status: json['status']?.toString() ?? 'open',
+      assignedCourier: json['assignedCourier'] != null ? User.fromJson(json['assignedCourier']) : null,
     );
   }
 }
